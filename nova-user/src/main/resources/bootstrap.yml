@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: nova-user
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: 129.211.0.210:8848
+      discovery:
+        namespace: public
+        group: NOVA_GROUP
+      config:
+        namespace: public
+        group: NOVA_GROUP
+        file-extension: yaml

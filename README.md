@@ -9,6 +9,19 @@ SaaS 平台。
 
 ## 核心功能模块
 
+### 项目结构
+
+```
+chatnova
+├── nova-gateway
+├── nova-user
+├── nova-ai
+├── nova-order
+├── nova-common
+├── nova-api
+└── nova-ui
+```
+
 ### 用户模块
 
 - 用户注册 / 登录
@@ -32,6 +45,22 @@ SaaS 平台。
 - 异步通知机制（MQ）
 
 ## 技术栈
+
+- JDK 17
+- Spring Boot 3.2.5
+- Spring Cloud 2023.0.2
+- Spring Cloud Alibaba 2023.0.1.0
+- Nacos 2.3.2
+- Spring Cloud Gateway
+- OpenFeign
+- Sentinel 1.8.6
+- MySQL 8
+- Redis 6+
+- RabbitMQ 3.12+
+- MyBatis Plus 3.5.7+
+- Docker
+- Python 3.11
+- LangChain 0.2+
 
 ### 后端核心
 
@@ -59,3 +88,9 @@ SaaS 平台。
 - Docker（容器化部署）
 - Maven（依赖管理）
 - Vue3（前端）
+
+## 开发日志
+
+按天沉淀的开发文档见 [`docs/`](./docs/README.md)。当前进度：
+
+- Day 2 · [SpringCloud 基础骨架](./docs/day02-springcloud-skeleton.md)
