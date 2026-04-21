@@ -15,10 +15,7 @@
     <description>NovaChat 网关服务</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>com.wang</groupId>
             <artifactId>nova-common</artifactId>

@@ -95,3 +95,4 @@ chatnova
 
 - Day 2 · [SpringCloud 基础骨架](./docs/day02-springcloud-skeleton.md)
 - Day 3 · [统一基础工程 nova-common](./docs/day03-common-skeleton.md)
+- Day 6 · [用户注册登录 + 密码加密](./docs/day06-user-register-login.md)
