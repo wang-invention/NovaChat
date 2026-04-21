@@ -6,9 +6,10 @@
 | ----- | ------------------------------ | ---------------------------------------------------------------- |
 | Day 1 | 项目立项 & 技术选型            | （见根目录 README）                                              |
 | Day 2 | SpringCloud 基础骨架           | [day02-springcloud-skeleton.md](./day02-springcloud-skeleton.md) |
-| Day 3 | 用户模块：数据层 + 注册登录    | _TODO_                                                           |
-| Day 4 | JWT 鉴权 + 网关统一过滤器      | _TODO_                                                           |
-| Day 5 | AI 聊天模块（LangChain 对接）  | _TODO_                                                           |
+| Day 3 | 统一基础工程 nova-common       | [day03-common-skeleton.md](./day03-common-skeleton.md)           |
+| Day 4 | 用户模块：数据层 + 注册登录    | _TODO_                                                           |
+| Day 5 | JWT 鉴权 + 网关统一过滤器      | _TODO_                                                           |
+| Day 6 | AI 聊天模块（LangChain 对接）  | _TODO_                                                           |
 
 ## 写作约定
 

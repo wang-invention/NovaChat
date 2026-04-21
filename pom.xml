@@ -14,6 +14,7 @@
     <modules>
         <module>nova-gateway</module>
         <module>nova-user</module>
+        <module>nova-common</module>
     </modules>
 
     <properties>

@@ -94,3 +94,4 @@ chatnova
 按天沉淀的开发文档见 [`docs/`](./docs/README.md)。当前进度：
 
 - Day 2 · [SpringCloud 基础骨架](./docs/day02-springcloud-skeleton.md)
+- Day 3 · [统一基础工程 nova-common](./docs/day03-common-skeleton.md)
