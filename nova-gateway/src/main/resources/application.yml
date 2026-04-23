@@ -14,9 +14,27 @@ spring:
           predicates:
             - Path=/api/user/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=2
+
+nova:
+  # JWT 密钥须与 nova-user 一致，否则签名校验通不过
+  jwt:
+    secret: ${NOVA_JWT_SECRET:nova-chat-jwt-secret-change-me-in-production-2026}
+    expire-seconds: 604800
+    issuer: nova-chat
+
+  auth:
+    enabled: true
+    # Ant 路径匹配。注意：这里是网关收到的原始 path（StripPrefix 之前）
+    white-list:
+      - /health/**
+      - /api/user/users/register
+      - /api/user/users/login
+      - /api/user/actuator/**
+      - /actuator/**
 
 logging:
   level:
     org.springframework.cloud.gateway: info
     reactor.netty.http.client: info
+    com.wang.novachat.gateway.filter: debug

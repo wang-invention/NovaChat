@@ -11,6 +11,9 @@ target/
 *.iws
 *.iml
 *.ipr
+.cursor
+nova-front/.trae/
+
 
 ### Eclipse ###
 .apt_generated

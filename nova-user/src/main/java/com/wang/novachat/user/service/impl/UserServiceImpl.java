@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wang.novachat.common.exception.BusinessException;
 import com.wang.novachat.common.result.ResultCode;
-import com.wang.novachat.common.utils.IdUtils;
+import com.wang.novachat.common.security.JwtService;
 import com.wang.novachat.common.utils.PasswordUtils;
 import com.wang.novachat.user.dto.UserLoginDTO;
 import com.wang.novachat.user.dto.UserRegisterDTO;
@@ -21,20 +21,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    /** Day6 的 token 先用 UUID 占位，有效期 7 天，Day7 会换成 JWT */
-    private static final long TOKEN_EXPIRE_MILLIS = 7L * 24 * 60 * 60 * 1000;
-
     private static final String DEFAULT_AVATAR =
             "https://cdn.novachat.example.com/avatar/default.png";
 
     private final UserMapper userMapper;
+
+    private final JwtService jwtService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -102,14 +100,15 @@ public class UserServiceImpl implements UserService {
             log.warn("[用户登录] 最后登录信息更新失败：userId={}", user.getId(), e);
         }
 
+        String token = jwtService.issueToken(user.getId(), user.getUsername());
+
         LoginVO vo = new LoginVO();
         vo.setUserId(user.getId());
         vo.setUsername(user.getUsername());
         vo.setNickname(user.getNickname());
         vo.setAvatar(user.getAvatar());
-        vo.setToken(IdUtils.simpleUUID());
-        vo.setExpiresAt(LocalDateTime.now().plusSeconds(TOKEN_EXPIRE_MILLIS / 1000)
-                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        vo.setToken(token);
+        vo.setExpiresAt(System.currentTimeMillis() + jwtService.getExpireSeconds() * 1000);
 
         log.info("[用户登录] id={}, username={}", user.getId(), user.getUsername());
         return vo;

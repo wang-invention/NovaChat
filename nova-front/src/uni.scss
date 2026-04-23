@@ -1,0 +1,106 @@
+/**
+ * ChatNova 设计 Token（唯一权威源）
+ * 所有页面/组件必须使用本文件中的变量，禁止硬编码色值/尺寸。
+ *
+ * 命名：$cn-<category>-<role>[-<variant>]
+ * 单位：rpx（移动端适配），过渡 ms
+ */
+
+/* ========== 主题色 ========== */
+$cn-primary: #07c160;          // 品牌主色（微信绿）
+$cn-primary-light: #10d876;    // 渐变亮端
+$cn-primary-dark: #06ad56;     // 按压/深色
+$cn-primary-gradient: linear-gradient(135deg, #07c160, #10d876);
+
+/* ========== 语义色 ========== */
+$cn-success: #07c160;
+$cn-danger: #fa5151;           // 微信系 Danger
+$cn-warning: #ffb930;
+$cn-info: #10aeff;
+
+/* ========== 背景与表面 ========== */
+$cn-bg: #f7f8fa;               // 页面底色
+$cn-card: #ffffff;              // 卡片/面板
+$cn-surface-tint: #f2f3f5;     // 输入底色（可选，tab 分组背景）
+$cn-overlay: rgba(0, 0, 0, 0.5); // 遮罩
+
+/* ========== 文字 ========== */
+$cn-text: #111111;             // 主文字
+$cn-text-sub: #666666;         // 次文字
+$cn-text-tertiary: #999999;    // 三级弱化文字
+$cn-text-placeholder: #bbbbbb; // 占位
+$cn-text-disabled: rgba(17, 17, 17, 0.38);
+$cn-text-on-primary: #ffffff;
+
+/* ========== 边框 ========== */
+$cn-border: #eaeaea;           // 标准边框
+$cn-border-strong: #d4d4d4;    // 强调边框
+$cn-divider: #f0f0f0;          // 列表分割线
+
+/* ========== 圆角 ========== */
+$cn-radius-xs: 8rpx;
+$cn-radius-sm: 12rpx;
+$cn-radius-md: 20rpx;           // 输入框
+$cn-radius-lg: 32rpx;           // 卡片 / Logo
+$cn-radius-xl: 40rpx;
+$cn-radius-pill: 999rpx;        // 胶囊按钮
+
+/* ========== 间距（4/8 节奏） ========== */
+$cn-space-2: 4rpx;
+$cn-space-3: 8rpx;
+$cn-space-4: 12rpx;
+$cn-space-5: 16rpx;
+$cn-space-6: 20rpx;
+$cn-space-7: 24rpx;
+$cn-space-8: 32rpx;
+$cn-space-9: 40rpx;
+$cn-space-10: 48rpx;
+$cn-space-12: 64rpx;
+$cn-space-14: 72rpx;
+
+/* ========== 字号（rpx，对应 12/14/16/18/20/22/28 pt 节奏） ========== */
+$cn-fs-caption: 22rpx;  // 协议、辅助文字
+$cn-fs-sm: 26rpx;       // 次要文字
+$cn-fs-base: 28rpx;     // 基础正文
+$cn-fs-body: 30rpx;     // 主体
+$cn-fs-btn: 32rpx;      // 按钮文字
+$cn-fs-title: 44rpx;    // 小标题
+$cn-fs-display: 56rpx;  // 品牌大标题
+
+/* ========== 字重 ========== */
+$cn-fw-regular: 400;
+$cn-fw-medium: 500;
+$cn-fw-semibold: 600;
+$cn-fw-bold: 700;
+
+/* ========== 行高 ========== */
+$cn-lh-tight: 1.2;
+$cn-lh-normal: 1.5;
+$cn-lh-relaxed: 1.7;
+
+/* ========== 阴影（elevation） ========== */
+$cn-shadow-sm: 0 4rpx 12rpx rgba(17, 17, 17, 0.04);
+$cn-shadow-md: 0 18rpx 48rpx rgba(17, 17, 17, 0.06);   // 卡片
+$cn-shadow-lg: 0 24rpx 60rpx rgba(17, 17, 17, 0.10);
+$cn-shadow-primary: 0 16rpx 32rpx rgba(7, 193, 96, 0.24); // 主按钮
+$cn-shadow-danger: 0 12rpx 28rpx rgba(250, 81, 81, 0.22);
+
+/* ========== 动效（150-300ms 标准） ========== */
+$cn-dur-fast: 120ms;
+$cn-dur-base: 200ms;
+$cn-dur-slow: 300ms;
+$cn-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$cn-ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+$cn-ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* ========== Focus ring（无障碍） ========== */
+$cn-focus-ring: 0 0 0 4rpx rgba(7, 193, 96, 0.18);
+$cn-focus-ring-danger: 0 0 0 4rpx rgba(250, 81, 81, 0.18);
+
+/* ========== z-index 分层 ========== */
+$cn-z-base: 0;
+$cn-z-nav: 10;
+$cn-z-fixed: 20;
+$cn-z-backdrop: 40;
+$cn-z-modal: 100;
+$cn-z-toast: 1000;

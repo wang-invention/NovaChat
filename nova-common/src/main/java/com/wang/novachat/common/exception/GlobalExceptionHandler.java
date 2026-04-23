@@ -5,6 +5,7 @@ import com.wang.novachat.common.result.ResultCode;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -13,17 +14,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.stream.Collectors;
 
 /**
  * 全局异常处理。
- * <p>只在引入 spring-webmvc 的服务中生效（WebFlux 网关不会加载本类）。
- * <p>统一吞掉异常，转成 {@link Result} 结构返回前端。
+ * <p>仅在引入 spring-webmvc（即 classpath 存在 {@link DispatcherServlet}）时加载。
+ * WebFlux 网关不会加载本类，避免 ClassNotFoundException。
  */
 @Slf4j
 @RestControllerAdvice
+@ConditionalOnClass(DispatcherServlet.class)
 public class GlobalExceptionHandler {
 
     /**

@@ -31,6 +31,7 @@
         <lombok.version>1.18.32</lombok.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <hutool.version>5.8.26</hutool.version>
+        <jjwt.version>0.12.6</jjwt.version>
 
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     </properties>
@@ -78,6 +79,22 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

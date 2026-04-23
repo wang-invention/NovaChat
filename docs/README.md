@@ -10,7 +10,7 @@
 | Day 4 | 数据库初始化（三库五表）       | _TODO 待归档_                                                    |
 | Day 5 | MyBatis-Plus 接入（预留）      | _TODO_                                                           |
 | Day 6 | 用户注册登录 + 密码加密        | [day06-user-register-login.md](./day06-user-register-login.md)   |
-| Day 7 | JWT 鉴权 + 网关统一过滤器      | _TODO_                                                           |
+| Day 7 | JWT 体系 + 网关统一鉴权        | [day07-jwt-gateway.md](./day07-jwt-gateway.md)                   |
 | Day 8 | AI 聊天模块（LangChain 对接）  | _TODO_                                                           |
 
 ## 写作约定
