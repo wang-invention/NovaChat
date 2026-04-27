@@ -20,6 +20,12 @@ public final class CommonConstant {
     /** 网关透传到下游服务的用户名头 */
     public static final String HEADER_USERNAME = "X-User-Name";
 
+    /** 网关透传到下游服务的设备 ID 头 */
+    public static final String HEADER_DEVICE_ID = "X-Device-Id";
+
+    /** 客户端设备 ID 请求头 */
+    public static final String HEADER_X_DEVICE_ID = "X-Device-Id";
+
     /** 默认字符集 */
     public static final String CHARSET_UTF8 = "UTF-8";
 

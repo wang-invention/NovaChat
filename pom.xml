@@ -32,8 +32,11 @@
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <hutool.version>5.8.26</hutool.version>
         <jjwt.version>0.12.6</jjwt.version>
-
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+
+        <!-- 显式声明 Redis 相关版本，避免 IDEA 依赖视图把 BOM 内部的 ${lettuce.version} 误判为未解析（构建本身不受影响） -->
+        <lettuce.version>6.3.2.RELEASE</lettuce.version>
+        <spring-data-redis.version>3.2.5</spring-data-redis.version>
     </properties>
 
     <dependencyManagement>
@@ -96,6 +99,8 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
             </dependency>
+
+
         </dependencies>
     </dependencyManagement>
 

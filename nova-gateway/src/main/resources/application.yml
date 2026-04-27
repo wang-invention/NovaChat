@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+
+
   cloud:
     gateway:
       discovery:
@@ -16,6 +18,8 @@ spring:
           filters:
             - StripPrefix=2
 
+
+          
 nova:
   # JWT 密钥须与 nova-user 一致，否则签名校验通不过
   jwt:

@@ -26,6 +26,8 @@ public class JwtService {
 
     public static final String CLAIM_USER_ID = "userId";
     public static final String CLAIM_USERNAME = "username";
+    public static final String CLAIM_JTI = "jti";
+    public static final String CLAIM_DEVICE_ID = "deviceId";
 
     private final JwtProperties properties;
 
@@ -48,8 +50,10 @@ public class JwtService {
      *
      * @param userId   用户 ID，存 sub 与自定义 claim
      * @param username 用户名
+     * @param jti      Token 唯一标识（UUID），用于 Redis 反查
+     * @param deviceId 设备 ID
      */
-    public String issueToken(Long userId, String username) {
+    public String issueToken(Long userId, String username, String jti, String deviceId) {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
         Date expiresAt = new Date(now + properties.getExpireSeconds() * 1000);
@@ -59,6 +63,8 @@ public class JwtService {
                 .subject(String.valueOf(userId))
                 .claim(CLAIM_USER_ID, userId)
                 .claim(CLAIM_USERNAME, username)
+                .claim(CLAIM_JTI, jti)
+                .claim(CLAIM_DEVICE_ID, deviceId)
                 .issuedAt(issuedAt)
                 .expiration(expiresAt)
                 .signWith(signingKey, Jwts.SIG.HS256)
@@ -115,6 +121,16 @@ public class JwtService {
 
     public String getUsername(Claims claims) {
         Object v = claims.get(CLAIM_USERNAME);
+        return v == null ? null : v.toString();
+    }
+
+    public String getTokenId(Claims claims) {
+        Object v = claims.get(CLAIM_JTI);
+        return v == null ? null : v.toString();
+    }
+
+    public String getDeviceId(Claims claims) {
+        Object v = claims.get(CLAIM_DEVICE_ID);
         return v == null ? null : v.toString();
     }
 

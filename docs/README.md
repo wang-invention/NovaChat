@@ -11,7 +11,9 @@
 | Day 5 | MyBatis-Plus 接入（预留）      | _TODO_                                                           |
 | Day 6 | 用户注册登录 + 密码加密        | [day06-user-register-login.md](./day06-user-register-login.md)   |
 | Day 7 | JWT 体系 + 网关统一鉴权        | [day07-jwt-gateway.md](./day07-jwt-gateway.md)                   |
-| Day 8 | AI 聊天模块（LangChain 对接）  | _TODO_                                                           |
+| Day 8 | Redis 登录态 / 主动登出 / 踢下线 | [day08-redis-login.md](./day08-redis-login.md)                   |
+| Day 9 | 用户信息接口 + 登录态验证      | [day09-user-info.md](./day09-user-info.md)                       |
+| Day 10 | AI 聊天模块（LangChain 对接）  | _TODO_                                                           |
 
 ## 写作约定
 

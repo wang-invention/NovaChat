@@ -112,6 +112,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from "vue";
 import { loginByPassword } from "@/api/user";
+import { getDeviceId, getDeviceType } from "@/utils/device";
 
 const loading = ref(false);
 const showPassword = ref(false);
@@ -218,9 +219,15 @@ const handleLogin = async () => {
   try {
     uni.showLoading({ title: "登录中...", mask: true });
 
+    // 获取设备信息，用于多端登录管理
+    const deviceId = getDeviceId();
+    const deviceType = getDeviceType();
+
     const res = await loginByPassword({
       username: form.username,
       password: form.password,
+      deviceId: deviceId,
+      deviceType: deviceType,
     });
 
     const { data } = res;
@@ -232,10 +239,12 @@ const handleLogin = async () => {
       avatar: data.avatar,
     };
 
+    // 保存登录态
     uni.setStorageSync("token", token);
     uni.setStorageSync("userInfo", userInfo);
-    uni.hideLoading();
+    uni.setStorageSync("isLogin", true);
 
+    uni.hideLoading();
     uni.showToast({ title: "登录成功", icon: "success" });
 
     setTimeout(() => {
@@ -248,7 +257,14 @@ const handleLogin = async () => {
     }, 400);
   } catch (err) {
     uni.hideLoading();
-    uni.showToast({ title: err.message || "登录失败，请重试", icon: "none" });
+    // 处理特定错误码
+    if (err.code === 1001) {
+      uni.showToast({ title: "用户名或密码错误", icon: "none" });
+    } else if (err.code === 1006) {
+      uni.showToast({ title: "登录已失效，请重新登录", icon: "none" });
+    } else {
+      uni.showToast({ title: err.message || "登录失败，请重试", icon: "none" });
+    }
   } finally {
     loading.value = false;
   }

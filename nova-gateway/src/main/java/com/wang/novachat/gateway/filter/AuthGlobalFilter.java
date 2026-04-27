@@ -6,6 +6,7 @@ import com.wang.novachat.common.constant.CommonConstant;
 import com.wang.novachat.common.result.Result;
 import com.wang.novachat.common.result.ResultCode;
 import com.wang.novachat.common.security.JwtService;
+import com.wang.novachat.common.security.RedisKeys;
 import com.wang.novachat.gateway.config.AuthProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -16,6 +17,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -28,10 +30,6 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * 网关统一鉴权：解析并校验 JWT，校验通过后把 {@code userId / username} 透传到下游服务。
- * <p>白名单路径直接放行，失败以 {@link Result} 形式写回 401。
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -42,6 +40,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private final JwtService jwtService;
     private final AuthProperties authProperties;
     private final ObjectMapper objectMapper;
+    private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -57,11 +56,11 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // 防御性丢弃：下游不允许客户端自己塞 X-User-Id
         ServerHttpRequest sanitized = request.mutate()
                 .headers(h -> {
                     h.remove(CommonConstant.HEADER_USER_ID);
                     h.remove(CommonConstant.HEADER_USERNAME);
+                    h.remove(CommonConstant.HEADER_DEVICE_ID);
                 })
                 .build();
 
@@ -84,17 +83,39 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
         Long userId = jwtService.getUserId(claims);
         String username = jwtService.getUsername(claims);
+        String tokenId = jwtService.getTokenId(claims);
+        String deviceId = jwtService.getDeviceId(claims);
+
         if (userId == null) {
             return writeUnauthorized(exchange, ResultCode.TOKEN_INVALID, "Token 缺少用户信息");
         }
 
-        ServerHttpRequest mutated = sanitized.mutate()
-                .header(CommonConstant.HEADER_USER_ID, String.valueOf(userId))
-                .header(CommonConstant.HEADER_USERNAME, username == null ? "" : username)
-                .build();
+        String redisKey = RedisKeys.token(tokenId);
+        return reactiveStringRedisTemplate.hasKey(redisKey)
+                .flatMap(exists -> {
+                    if (!Boolean.TRUE.equals(exists)) {
+                        log.info("[Auth] Token 已在 Redis 中失效：tokenId={}", tokenId);
+                        return writeUnauthorized(exchange, ResultCode.TOKEN_REVOKED, "Token 已失效");
+                    }
 
-        log.debug("[Auth] 鉴权通过：userId={}, path={}", userId, path);
-        return chain.filter(exchange.mutate().request(mutated).build());
+                    ServerHttpRequest mutated = sanitized.mutate()
+                            .header(CommonConstant.HEADER_USER_ID, String.valueOf(userId))
+                            .header(CommonConstant.HEADER_USERNAME, username == null ? "" : username)
+                            .header(CommonConstant.HEADER_DEVICE_ID, deviceId == null ? "" : deviceId)
+                            .build();
+
+                    log.debug("[Auth] 鉴权通过：userId={}, path={}", userId, path);
+                    return chain.filter(exchange.mutate().request(mutated).build());
+                })
+                .onErrorResume(e -> {
+                    log.warn("[Auth] Redis 查询失败，降级放行：err={}", e.getMessage());
+                    ServerHttpRequest mutated = sanitized.mutate()
+                            .header(CommonConstant.HEADER_USER_ID, String.valueOf(userId))
+                            .header(CommonConstant.HEADER_USERNAME, username == null ? "" : username)
+                            .header(CommonConstant.HEADER_DEVICE_ID, deviceId == null ? "" : deviceId)
+                            .build();
+                    return chain.filter(exchange.mutate().request(mutated).build());
+                });
     }
 
     private boolean isWhiteList(String path) {
@@ -130,7 +151,6 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // 尽量靠前执行，保证路由匹配之前完成鉴权
         return -100;
     }
 }

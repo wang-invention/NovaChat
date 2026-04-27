@@ -1,0 +1,21 @@
+# FastAPI 基础依赖
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# 数据验证
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# HTTP 客户端（用于调用外部 AI API）
+httpx==0.26.0
+aiohttp==3.9.1
+
+# 工具库
+python-dotenv==1.0.0
+orjson==3.9.10
+
+# 日志
+structlog==24.1.0
+
+# 开发调试（可选）
+# debugpy==1.8.0

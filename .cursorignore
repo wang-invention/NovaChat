@@ -1,0 +1,32 @@
+# 依赖、构建产物、缓存、日志（绝对不要索引）
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.output/
+target/
+classes/
+__pycache__/
+*.pyc
+*.log
+*.tmp
+*.swp
+# 版本控制、临时目录
+.git/
+.svn/
+.idea/
+.vscode/
+.DS_Store
+# 大文件、压缩包、图片
+*.zip
+*.tar.gz
+*.png
+*.jpg
+*.svg
+# 单文件过大（>1MB）、生成代码
+*.min.js
+*.map
+__generated__/
+openapi/
+.trae

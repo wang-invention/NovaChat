@@ -13,3 +13,7 @@ spring:
         namespace: public
         group: NOVA_GROUP
         file-extension: yaml
+        shared-configs:
+          - data-id: nova-redis.yaml
+            group: NOVA_GROUP
+            refresh: true

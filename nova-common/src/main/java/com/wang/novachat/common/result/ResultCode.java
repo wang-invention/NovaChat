@@ -37,6 +37,8 @@ public enum ResultCode {
     PASSWORD_ERROR(1003, "账号或密码错误"),
     TOKEN_INVALID(1004, "Token 无效"),
     TOKEN_EXPIRED(1005, "Token 已过期"),
+    TOKEN_REVOKED(1006, "Token 已失效"),
+    OTHER_DEVICE_LOGIN(1007, "您的账号在其他设备登录"),
     ;
 
     private final Integer code;
