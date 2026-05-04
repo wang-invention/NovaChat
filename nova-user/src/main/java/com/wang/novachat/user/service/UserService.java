@@ -69,4 +69,6 @@ public interface UserService {
      * @param userId 用户 ID（从网关透传头获取）
      */
     UserVO getCurrentUser(Long userId);
+
+    List<UserVO> searchUsers(String keyword);
 }

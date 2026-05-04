@@ -13,7 +13,7 @@ class Message(BaseModel):
         ...,
         description="消息角色: system-系统, user-用户, assistant-助手"
     )
-    content: str = Field(..., description="消息内容", min_length=1)
+    content: str = Field(default="", description="消息内容")
 
 
 class ChatRequest(BaseModel):

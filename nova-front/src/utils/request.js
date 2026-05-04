@@ -7,11 +7,11 @@
  */
 
 // #ifdef H5
-const BASE_URL = "/api";
+const BASE_URL = "http://192.168.1.101:8080/api";
 // #endif
 
 // #ifndef H5
-const BASE_URL = "http://127.0.0.1:8080/api";
+const BASE_URL = "http://192.168.1.101:8080/api";
 // #endif
 
 const TIMEOUT = 15000;

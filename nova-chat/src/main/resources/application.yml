@@ -1,11 +1,11 @@
 server:
-  port: 8081
+  port: 8087
   address: 0.0.0.0
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://129.211.0.210:3307/nova_user?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://129.211.0.210:3307/nova_chat?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
     username: root
     password: 'mysql_pYDshf'
     hikari:
@@ -13,7 +13,7 @@ spring:
       maximum-pool-size: 20
       idle-timeout: 60000
       connection-timeout: 10000
-      pool-name: NovaUserHikari
+      pool-name: NovaChatHikari
 
 mybatis-plus:
   configuration:
@@ -29,15 +29,6 @@ mybatis-plus:
       update-strategy: not_null
   mapper-locations: classpath*:/mapper/**/*.xml
 
-nova:
-  jwt:
-    secret: ${NOVA_JWT_SECRET:nova-chat-jwt-secret-change-me-in-production-2026}
-    expire-seconds: 604800
-    issuer: nova-chat
-  login:
-    mode: ${NOVA_LOGIN_MODE:single}
-    max-devices: ${NOVA_LOGIN_MAX_DEVICES:3}
-
 management:
   endpoints:
     web:
@@ -50,4 +41,4 @@ management:
 logging:
   level:
     com.wang.novachat: debug
-    com.wang.novachat.user.mapper: debug
+    com.wang.novachat.chat.mapper: debug

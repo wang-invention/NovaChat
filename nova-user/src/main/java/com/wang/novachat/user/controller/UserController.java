@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -101,6 +102,16 @@ public class UserController {
     public Result<UserVO> getCurrentUser(HttpServletRequest request) {
         Long userId = requireUserId(request);
         return Result.success(userService.getCurrentUser(userId));
+    }
+
+    @GetMapping("/{userId}")
+    public Result<UserVO> getUserById(@PathVariable Long userId) {
+        return Result.success(userService.getCurrentUser(userId));
+    }
+
+    @GetMapping("/search")
+    public Result<List<UserVO>> searchUsers(@RequestParam("keyword") String keyword) {
+        return Result.success(userService.searchUsers(keyword));
     }
 
     private Long getUserId(HttpServletRequest request) {

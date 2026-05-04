@@ -216,6 +216,22 @@ public class UserServiceImpl implements UserService {
         return toVO(user);
     }
 
+    @Override
+    public List<UserVO> searchUsers(String keyword) {
+        if (StrUtil.isBlank(keyword)) {
+            return List.of();
+        }
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(User::getUsername, keyword)
+                .or()
+                .like(User::getNickname, keyword)
+                .or()
+                .like(User::getPhone, keyword)
+                .last("LIMIT 20");
+        List<User> users = userMapper.selectList(wrapper);
+        return users.stream().map(this::toVO).collect(java.util.stream.Collectors.toList());
+    }
+
     // ---------------- private ----------------
 
     /**

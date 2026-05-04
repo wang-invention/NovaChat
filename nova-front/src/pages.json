@@ -39,6 +39,22 @@
       "style": {
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/chat/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#f5f5f5"
+      }
+    },
+    {
+      "path": "pages/contacts/friend-requests",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#f5f5f5"
+      }
     }
   ],
   "globalStyle": {

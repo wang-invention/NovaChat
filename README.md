@@ -14,9 +14,9 @@ SaaS 平台。
 ```
 chatnova
 ├── nova-gateway
-├── nova-user
+├── nova-`user
 ├── nova-ai
-├── nova-order
+├── nova-order  DFDF
 ├── nova-common
 ├── nova-api
 └── nova-ui

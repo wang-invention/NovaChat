@@ -13,8 +13,11 @@
         class="avatar" 
         :src="data.avatar" 
         mode="aspectFill"
-        v-if="data.avatarType === 'single'"
+        v-if="data.avatarType === 'single' && data.avatar"
       />
+      <view class="avatar-placeholder" v-else-if="data.avatarType === 'single' && !data.avatar">
+        <text class="avatar-placeholder-text">{{ (data.name || '?')[0] }}</text>
+      </view>
       <view class="group-avatar" v-else-if="data.avatarType === 'group'">
         <image 
           v-for="(img, idx) in data.avatarList.slice(0, 4)" 
@@ -122,6 +125,22 @@ const handleClick = () => {
   height: 100rpx;
   border-radius: 12rpx;
   background-color: #f5f5f5;
+}
+
+.avatar-placeholder {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 12rpx;
+  background-color: #10aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-placeholder-text {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #ffffff;
 }
 
 /* 群聊头像（四格） */

@@ -1,5 +1,6 @@
 server:
   port: 8080
+  address: 0.0.0.0
 
 spring:
 
@@ -15,6 +16,13 @@ spring:
           uri: lb://nova-user
           predicates:
             - Path=/api/user/**
+          filters:
+            - StripPrefix=2
+
+        - id: nova-chat
+          uri: lb://nova-chat
+          predicates:
+            - Path=/api/chat/**
           filters:
             - StripPrefix=2
 

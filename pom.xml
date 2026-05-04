@@ -15,6 +15,7 @@
         <module>nova-gateway</module>
         <module>nova-user</module>
         <module>nova-common</module>
+        <module>nova-chat</module>
     </modules>
 
     <properties>
@@ -114,6 +115,9 @@
                     <configuration>
                         <release>${maven.compiler.release}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>

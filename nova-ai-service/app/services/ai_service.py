@@ -137,7 +137,7 @@ class AIService:
             return "不客气！如果还有其他问题，随时告诉我。"
 
         else:
-            return f"我收到了你的消息："{user_message}"。\n\n这是一个 Mock 回复。在实际部署时，我会调用真实的 AI 模型来生成更有意义的回答。"
+            return f"我收到了你的消息：\u201c{user_message}\u201d。\n\n这是一个 Mock 回复。在实际部署时，我会调用真实的 AI 模型来生成更有意义的回答。"
 
 
 # 全局 AI 服务实例
