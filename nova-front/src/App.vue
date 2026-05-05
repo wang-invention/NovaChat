@@ -1,8 +1,10 @@
 <script setup>
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { initSafeArea } from "@/utils/safe-area";
 
 onLaunch(() => {
   console.log("[ChatNova] App Launch");
+  initSafeArea();
 });
 
 onShow(() => {

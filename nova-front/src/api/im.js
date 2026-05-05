@@ -28,7 +28,7 @@ export function markRead(conversationId) {
 }
 
 export function getConversationId(targetUserId) {
-  return http.get("/chat/chat/conversations/id", { targetUserId });
+  return http.get(`/chat/chat/conversations/user/${targetUserId}`);
 }
 
 export function searchUsers(keyword) {

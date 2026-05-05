@@ -62,5 +62,10 @@
     "navigationBarTitleText": "ChatNova",
     "navigationBarBackgroundColor": "#FFFFFF",
     "backgroundColor": "#F7F8FA"
+  },
+  "safeArea": {
+    "bottom": {
+      "offset": "auto"
+    }
   }
 }

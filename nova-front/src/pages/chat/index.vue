@@ -1,5 +1,6 @@
 <template>
   <view class="chat-page" :style="pageBgStyle">
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
     <view class="nav-bar">
       <view class="nav-back" @click="goBack">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -117,7 +118,12 @@
       <view class="input-row">
         <input class="msg-input" v-model="inputText" placeholder="输入消息..." placeholder-class="input-placeholder" :disabled="isStreaming" confirm-type="send" @confirm="sendTextMsg" @focus="onInputFocus" />
         <view class="send-btn" :class="{ active: canSend }" @click="sendTextMsg">
+          <!-- #ifdef H5 -->
           <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <!-- #endif -->
+          <!-- #ifndef H5 -->
+          <uni-icons type="paperplane" size="20" color="#fff"></uni-icons>
+          <!-- #endif -->
         </view>
       </view>
     </view>
@@ -163,6 +169,7 @@ import { onLoad } from "@dcloudio/uni-app";
 import { chatCompletionStream } from "@/api/chat";
 import { sendMessage, getMessages, recallMessage, deleteMessage, markRead, getConversationId } from "@/api/im";
 import { connectWS, sendWSMessage, onWSMessage } from "@/utils/websocket";
+import { getStatusBarHeight } from "@/utils/safe-area";
 import {
   MSG_TYPE, MSG_STATUS,
   createTextMsg, createImageMsg, createSystemMsg,
@@ -171,6 +178,7 @@ import {
   saveChatBg, loadChatBg,
 } from "@/utils/message";
 
+const statusBarHeight = ref(getStatusBarHeight());
 const chatName = ref("");
 const chatType = ref("ai");
 const chatId = ref("ai_default");
@@ -209,7 +217,11 @@ const emojiList = [
 const canSend = computed(() => inputText.value.trim() && !isStreaming.value);
 const pageBgStyle = computed(() => chatBg.value ? { backgroundColor: chatBg.value } : {});
 
+let loadCount = 0;
+
 onLoad((options) => {
+  loadCount++;
+  console.log("[Chat] onLoad called, count=", loadCount, "options=", options);
   if (options.name) chatName.value = decodeURIComponent(options.name);
   if (options.chatType) chatType.value = options.chatType;
   if (options.chatId) chatId.value = options.chatId;
@@ -233,17 +245,6 @@ onLoad((options) => {
     if (conversationId.value) {
       markRead(conversationId.value).catch(() => {});
     }
-    removeWSHandler = onWSMessage((data) => {
-      if (data.type === "chat_received" && data.data) {
-        const msgData = data.data;
-        if (msgData.conversationId === conversationId.value) {
-          const msg = serverMsgToLocal(msgData, "other");
-          messages.value.push(msg);
-          scrollToBottom();
-          markRead(conversationId.value).catch(() => {});
-        }
-      }
-    });
   } else {
     const history = loadChatHistory(chatId.value);
     if (history.length > 0) {
@@ -270,6 +271,7 @@ function serverMsgToLocal(serverMsg, role) {
 
 async function loadServerMessages() {
   try {
+    console.log("[Chat] loadServerMessages called");
     if (!conversationId.value && targetUserId.value) {
       const res = await getConversationId(targetUserId.value);
       conversationId.value = res.data;
@@ -278,6 +280,7 @@ async function loadServerMessages() {
 
     const res = await getMessages({ conversationId: conversationId.value, size: 50 });
     const serverMsgs = res.data || [];
+    console.log("[Chat] server messages count:", serverMsgs.length);
     const me = uni.getStorageSync("userInfo");
     const myId = me?.id || me?.userId;
 
@@ -316,10 +319,13 @@ function toggleEmojiPanel() { showEmojiPanel.value = !showEmojiPanel.value; }
 function onInputFocus() { showEmojiPanel.value = false; }
 function insertEmoji(emoji) { inputText.value += emoji; }
 
+let isSending = false;
+
 async function sendTextMsg() {
   const text = inputText.value.trim();
-  if (!text || isStreaming.value) return;
+  if (!text || isStreaming.value || isSending) return;
 
+  isSending = true;
   const msg = createTextMsg("user", text, { quoteId: quoteMsg.value?.id || null });
   quoteMsg.value = null;
   messages.value.push(msg);
@@ -327,11 +333,15 @@ async function sendTextMsg() {
   showEmojiPanel.value = false;
   scrollToBottom();
 
-  if (chatType.value === "ai") {
-    msg.status = MSG_STATUS.SENT;
-    requestAIReply(msg);
-  } else {
-    await sendSingleChatMsg(msg);
+  try {
+    if (chatType.value === "ai") {
+      msg.status = MSG_STATUS.SENT;
+      requestAIReply(msg);
+    } else {
+      await sendSingleChatMsg(msg);
+    }
+  } finally {
+    isSending = false;
   }
 }
 
@@ -367,24 +377,7 @@ async function sendSingleChatMsg(localMsg) {
       return;
     }
 
-    const payload = {
-      receiverId: targetUserId.value,
-      type: localMsg.type,
-      content: localMsg.content,
-      imageUrl: localMsg.imageUrl,
-      quoteId: localMsg.quoteId || null,
-    };
-
-    console.log("Sending message:", payload);
-
-    // 先保存到数据库
-    const res = await sendMessage(payload);
-    console.log("sendMessage response:", res);
-    if (res.data) {
-      localMsg.serverId = res.data.id;
-    }
-
-    // 再通过 WebSocket 推送
+    // 直接通过 WebSocket 发送，后端会自动保存到数据库
     sendWSMessage({
       type: "chat",
       to: targetUserId.value,
@@ -568,14 +561,53 @@ function doClearHistory() {
   });
 }
 
+onMounted(() => {
+  console.log("[Chat] onMounted, removeWSHandler=", removeWSHandler);
+  // 只在单聊时注册 WebSocket 消息监听
+  if (chatType.value === "single" && !removeWSHandler) {
+    console.log("[Chat] registering WS handler");
+    removeWSHandler = onWSMessage((data) => {
+      console.log("[Chat] WS message received:", data.type, data.data?.id);
+      if (data.type === "chat_sent" && data.data) {
+        // 更新本地消息的 serverId
+        const msgData = data.data;
+        const localMsg = messages.value.find(m => m.content === msgData.content && m.status === MSG_STATUS.SENT);
+        if (localMsg) {
+          localMsg.serverId = msgData.id;
+        }
+      } else if (data.type === "chat_received" && data.data) {
+        const msgData = data.data;
+        if (msgData.conversationId === conversationId.value) {
+          // 如果是自己发送的消息，不重复添加
+          const me = uni.getStorageSync("userInfo");
+          const myId = me?.id || me?.userId;
+          if (msgData.senderId === myId) {
+            console.log("[Chat] ignoring self message");
+            return;
+          }
+          console.log("[Chat] adding message to list");
+          const msg = serverMsgToLocal(msgData, "other");
+          messages.value.push(msg);
+          scrollToBottom();
+          markRead(conversationId.value).catch(() => {});
+        }
+      }
+    });
+  }
+});
+
 onUnmounted(() => {
   if (chatType.value === "ai") saveChatHistory(chatId.value, messages.value);
-  if (removeWSHandler) removeWSHandler();
+  if (removeWSHandler) {
+    removeWSHandler();
+    removeWSHandler = null;
+  }
 });
 </script>
 
 <style lang="scss" scoped>
 page { background-color: #f5f5f5; }
+.status-bar { background-color: #ffffff; }
 .chat-page { height: 100vh; display: flex; flex-direction: column; background-color: #f5f5f5; position: relative; }
 .nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; z-index: 10; }
 .nav-back, .nav-more { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; }
