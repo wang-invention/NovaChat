@@ -609,7 +609,7 @@ onUnmounted(() => {
 page { background-color: #f5f5f5; }
 .status-bar { background-color: #ffffff; }
 .chat-page { height: 100vh; display: flex; flex-direction: column; background-color: #f5f5f5; position: relative; }
-.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; z-index: 10; }
+.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; z-index: 10; box-sizing: border-box; }
 .nav-back, .nav-more { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; }
 .nav-icon { width: 40rpx; height: 40rpx; color: #1a1a1a; }
 .nav-center { display: flex; flex-direction: column; align-items: center; }

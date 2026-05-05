@@ -21,7 +21,7 @@
     </view>
 
     <!-- 我的页面内容 - 可滚动区域 -->
-    <scroll-view class="mine-content" scroll-y refresher-enabled :refresher-triggered="isRefreshing" @refresherrefresh="onRefresh">
+    <scroll-view class="mine-content" :style="{ marginTop: navBarHeight + 'px' }" scroll-y refresher-enabled :refresher-triggered="isRefreshing" @refresherrefresh="onRefresh">
       <!-- 用户信息卡片 -->
       <view class="user-card" @click="goToProfile">
         <view class="user-main">
@@ -203,6 +203,8 @@ import { getCurrentUser, logout } from '@/api/user';
 // 响应式数据
 const isLogin = ref(false);
 const isRefreshing = ref(false);
+const statusBarHeight = ref(0);
+const navBarHeight = ref(0);
 const userInfo = reactive({
   id: null,
   username: '',
@@ -399,6 +401,9 @@ const handleLogout = () => {
 // 注意：UniApp 中 onShow 在页面每次显示时都会触发（包括首次加载）
 // 所以不需要同时使用 onMounted
 onShow(() => {
+  const systemInfo = uni.getSystemInfoSync();
+  statusBarHeight.value = systemInfo.statusBarHeight || 0;
+  navBarHeight.value = statusBarHeight.value + 44;
   checkLoginStatus();
   fetchUserInfo();
 });
@@ -426,6 +431,7 @@ page {
   padding: 0 20rpx;
   background-color: #ffffff;
   border-bottom: 1rpx solid #e5e5e5;
+  box-sizing: border-box;
 }
 
 .nav-title {

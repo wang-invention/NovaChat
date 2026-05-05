@@ -13,7 +13,7 @@
       </view>
     </view>
 
-    <scroll-view class="chat-list" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
+    <scroll-view class="chat-list" :style="{ marginTop: navBarHeight + 'px' }" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
       <chat-list-item
         v-for="(item, index) in chatList"
         :key="item.chatId || index"
@@ -45,6 +45,8 @@ export default {
       loading: false,
       refreshing: false,
       removeWSHandler: null,
+      statusBarHeight: 0,
+      navBarHeight: 0,
     };
   },
   computed: {
@@ -59,6 +61,9 @@ export default {
     }
   },
   onLoad() {
+    const systemInfo = uni.getSystemInfoSync();
+    this.statusBarHeight = systemInfo.statusBarHeight || 0;
+    this.navBarHeight = this.statusBarHeight + 44; // 状态栏 + 导航栏内容高度
     if (isLoggedIn()) {
       const userInfo = uni.getStorageSync('userInfo');
       if (userInfo && userInfo.userId) {
@@ -165,7 +170,7 @@ export default {
 <style lang="scss" scoped>
 page { background-color: #f5f5f5; }
 .home-page { height: 100vh; background-color: #f5f5f5; display: flex; flex-direction: column; }
-.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; }
+.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; box-sizing: border-box; }
 .nav-title { font-size: 36rpx; font-weight: 600; color: #111111; margin-right: 20rpx; }
 .nav-right { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 20rpx; }
 .search-box { flex: 1; height: 64rpx; background-color: #f5f5f5; border-radius: 16rpx; display: flex; align-items: center; padding: 0 20rpx; }

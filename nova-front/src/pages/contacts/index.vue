@@ -13,7 +13,7 @@
       </view>
     </view>
 
-    <scroll-view class="contacts-list" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
+    <scroll-view class="contacts-list" :style="{ marginTop: navBarHeight + 'px' }" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
       <view class="func-entries">
         <view class="func-item" @click="goFriendRequests">
           <view class="func-icon" style="background-color: #ff9500;">
@@ -127,6 +127,8 @@ export default {
       addFriendTarget: null,
       addFriendMsg: '',
       removeWSHandler: null,
+      statusBarHeight: 0,
+      navBarHeight: 0,
     };
   },
   onShow() {
@@ -136,6 +138,9 @@ export default {
     }
   },
   onLoad() {
+    const systemInfo = uni.getSystemInfoSync();
+    this.statusBarHeight = systemInfo.statusBarHeight || 0;
+    this.navBarHeight = this.statusBarHeight + 44;
     this.removeWSHandler = onWSMessage((data) => {
       if (data.type === 'friend_request' || data.type === 'friend_accepted') {
         this.loadPendingCount();
@@ -238,7 +243,7 @@ export default {
 <style lang="scss" scoped>
 page { background-color: #f5f5f5; }
 .contacts-page { height: 100vh; background-color: #f5f5f5; display: flex; flex-direction: column; }
-.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; }
+.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; box-sizing: border-box; }
 .nav-title { font-size: 36rpx; font-weight: 600; color: #111111; margin-right: 20rpx; }
 .nav-right { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 16rpx; }
 .search-box { flex: 1; height: 64rpx; background-color: #f5f5f5; border-radius: 16rpx; display: flex; align-items: center; padding: 0 20rpx; }

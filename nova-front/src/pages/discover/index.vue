@@ -15,7 +15,7 @@
     </view>
 
     <!-- 发现列表 - 可滚动区域 -->
-    <scroll-view class="discover-list" scroll-y>
+    <scroll-view class="discover-list" :style="{ marginTop: navBarHeight + 'px' }" scroll-y>
       <!-- 朋友圈 -->
       <view class="discover-section">
         <view class="discover-item">
@@ -216,8 +216,15 @@ export default {
           color: '#607D8B',
           icon: '<rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" stroke="currentColor" stroke-width="2"/><line x1="7" y1="2" x2="7" y2="22" stroke="currentColor" stroke-width="2"/><line x1="17" y1="2" x2="17" y2="22" stroke="currentColor" stroke-width="2"/><line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="2"/><line x1="2" y1="7" x2="7" y2="7" stroke="currentColor" stroke-width="2"/><line x1="2" y1="17" x2="7" y2="17" stroke="currentColor" stroke-width="2"/><line x1="17" y1="17" x2="22" y2="17" stroke="currentColor" stroke-width="2"/><line x1="17" y1="7" x2="22" y2="7" stroke="currentColor" stroke-width="2"/>'
         }
-      ]
+      ],
+      statusBarHeight: 0,
+      navBarHeight: 0,
     };
+  },
+  onLoad() {
+    const systemInfo = uni.getSystemInfoSync();
+    this.statusBarHeight = systemInfo.statusBarHeight || 0;
+    this.navBarHeight = this.statusBarHeight + 44;
   }
 };
 </script>
@@ -244,6 +251,7 @@ page {
   padding: 0 20rpx;
   background-color: #ffffff;
   border-bottom: 1rpx solid #e5e5e5;
+  box-sizing: border-box;
 }
 
 .nav-title {
