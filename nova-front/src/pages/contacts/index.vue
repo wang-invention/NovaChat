@@ -1,6 +1,6 @@
 <template>
   <view class="contacts-page">
-    <view class="nav-bar">
+    <view class="nav-bar" :style="{ marginTop: statusBarHeight + 'px' }">
       <text class="nav-title">通讯录</text>
       <view class="nav-right">
         <view class="search-box" @click="showSearch = true">
@@ -13,7 +13,7 @@
       </view>
     </view>
 
-    <scroll-view class="contacts-list" :style="{ marginTop: navBarHeight + 'px' }" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
+    <scroll-view class="contacts-list" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
       <view class="func-entries">
         <view class="func-item" @click="goFriendRequests">
           <view class="func-icon" style="background-color: #ff9500;">
@@ -139,7 +139,7 @@ export default {
   },
   onLoad() {
     const systemInfo = uni.getSystemInfoSync();
-    this.statusBarHeight = systemInfo.statusBarHeight || 0;
+    this.statusBarHeight = systemInfo.statusBarHeight || 20;
     this.navBarHeight = this.statusBarHeight + 44;
     this.removeWSHandler = onWSMessage((data) => {
       if (data.type === 'friend_request' || data.type === 'friend_accepted') {

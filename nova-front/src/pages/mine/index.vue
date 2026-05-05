@@ -1,7 +1,7 @@
 <template>
   <view class="mine-page">
     <!-- 顶部导航栏 - 固定 -->
-    <view class="nav-bar">
+    <view class="nav-bar" :style="{ marginTop: statusBarHeight + 'px' }">
       <text class="nav-title">我的</text>
       <view class="nav-right">
         <view class="icon-btn" @click="handleSearch">
@@ -21,7 +21,7 @@
     </view>
 
     <!-- 我的页面内容 - 可滚动区域 -->
-    <scroll-view class="mine-content" :style="{ marginTop: navBarHeight + 'px' }" scroll-y refresher-enabled :refresher-triggered="isRefreshing" @refresherrefresh="onRefresh">
+    <scroll-view class="mine-content" scroll-y refresher-enabled :refresher-triggered="isRefreshing" @refresherrefresh="onRefresh">
       <!-- 用户信息卡片 -->
       <view class="user-card" @click="goToProfile">
         <view class="user-main">
@@ -402,7 +402,7 @@ const handleLogout = () => {
 // 所以不需要同时使用 onMounted
 onShow(() => {
   const systemInfo = uni.getSystemInfoSync();
-  statusBarHeight.value = systemInfo.statusBarHeight || 0;
+  statusBarHeight.value = systemInfo.statusBarHeight || 20;
   navBarHeight.value = statusBarHeight.value + 44;
   checkLoginStatus();
   fetchUserInfo();

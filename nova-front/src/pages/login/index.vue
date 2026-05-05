@@ -1,12 +1,12 @@
 <template>
   <view class="login-page">
-    <view class="login-header">
+    <view class="login-header" :style="{ marginTop: statusBarHeight + 'px' }">
       <view class="back-btn" @click="goBack" role="button" tabindex="0" @keydown.enter="goBack" aria-label="返回">
         <svg class="back-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </view>
-      <text class="header-title">登录</text>
+      <text class="header-title">登录1</text>
       <view class="header-placeholder"></view>
     </view>
 
@@ -111,6 +111,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from "vue";
+import { onLoad } from "@dcloudio/uni-app";
 import { loginByPassword } from "@/api/user";
 import { getDeviceId, getDeviceType } from "@/utils/device";
 
@@ -119,6 +120,7 @@ const showPassword = ref(false);
 const showProtocol = ref(false);
 const protocolTitle = ref("");
 const protocolContent = ref("");
+const statusBarHeight = ref(0);
 
 const form = reactive({
   username: "",
@@ -306,6 +308,11 @@ const openProtocol = (type) => {
   }
   showProtocol.value = true;
 };
+
+onLoad(() => {
+  const systemInfo = uni.getSystemInfoSync();
+  statusBarHeight.value = systemInfo.statusBarHeight || 20;
+});
 </script>
 
 <style lang="scss" scoped>

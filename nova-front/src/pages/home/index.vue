@@ -1,6 +1,6 @@
 <template>
   <view class="home-page">
-    <view class="nav-bar">
+    <view class="nav-bar" :style="{ marginTop: statusBarHeight + 'px' }">
       <text class="nav-title">ChatNova</text>
       <view class="nav-right">
         <view class="search-box">
@@ -13,7 +13,7 @@
       </view>
     </view>
 
-    <scroll-view class="chat-list" :style="{ marginTop: navBarHeight + 'px' }" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
+    <scroll-view class="chat-list" scroll-y @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="refreshing">
       <chat-list-item
         v-for="(item, index) in chatList"
         :key="item.chatId || index"
@@ -62,7 +62,7 @@ export default {
   },
   onLoad() {
     const systemInfo = uni.getSystemInfoSync();
-    this.statusBarHeight = systemInfo.statusBarHeight || 0;
+    this.statusBarHeight = systemInfo.statusBarHeight || 20;
     this.navBarHeight = this.statusBarHeight + 44; // 状态栏 + 导航栏内容高度
     if (isLoggedIn()) {
       const userInfo = uni.getStorageSync('userInfo');

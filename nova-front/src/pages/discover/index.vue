@@ -1,7 +1,7 @@
 <template>
   <view class="discover-page">
     <!-- 顶部导航栏 - 固定 -->
-    <view class="nav-bar">
+    <view class="nav-bar" :style="{ marginTop: statusBarHeight + 'px' }">
       <text class="nav-title">发现</text>
       <view class="nav-right">
         <view class="search-box">
@@ -15,7 +15,7 @@
     </view>
 
     <!-- 发现列表 - 可滚动区域 -->
-    <scroll-view class="discover-list" :style="{ marginTop: navBarHeight + 'px' }" scroll-y>
+    <scroll-view class="discover-list" scroll-y>
       <!-- 朋友圈 -->
       <view class="discover-section">
         <view class="discover-item">
@@ -223,7 +223,7 @@ export default {
   },
   onLoad() {
     const systemInfo = uni.getSystemInfoSync();
-    this.statusBarHeight = systemInfo.statusBarHeight || 0;
+    this.statusBarHeight = systemInfo.statusBarHeight || 20;
     this.navBarHeight = this.statusBarHeight + 44;
   }
 };

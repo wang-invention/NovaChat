@@ -44,7 +44,12 @@
     },
     "devServer": {
       "port": 5173,
-      "https": false
+      "https": false,
+      "hot": true,
+      "open": true,
+      "watchOptions": {
+        "poll": true
+      }
     }
   },
   "vueVersion": "2"
