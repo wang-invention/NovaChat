@@ -17,5 +17,9 @@ public class SendMessageDTO {
 
     private String imageUrl;
 
+    private String thumbUrl;
+
+    private String originUrl;
+
     private Long quoteId;
 }

@@ -1,8 +1,8 @@
 <template>
   <view class="friend-requests-page">
-    <view class="nav-bar">
+    <view class="nav-bar" :style="{ marginTop: statusBarHeight + 'px' }">
       <view class="nav-back" @click="goBack">
-        <svg class="back-icon" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg-icon class="back-icon" icon="<path d='M15 18l-6-6 6-6' stroke='#111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" color="#111" />
       </view>
       <text class="nav-title">新的朋友</text>
     </view>
@@ -38,87 +38,92 @@
   </view>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import { getPendingFriendRequests, acceptFriendRequest, rejectFriendRequest } from '@/api/im';
 
-export default {
-  data() {
-    return {
-      requests: [],
-      loading: false,
-      refreshing: false,
-    };
-  },
-  onShow() {
-    this.loadRequests();
-  },
-  methods: {
-    async loadRequests() {
-      this.loading = true;
-      try {
-        const res = await getPendingFriendRequests();
-        this.requests = res.data || [];
-      } catch (e) {
-        console.error('loadRequests failed:', e);
-      } finally {
-        this.loading = false;
-        this.refreshing = false;
-      }
-    },
-    onRefresh() {
-      this.refreshing = true;
-      this.loadRequests();
-    },
-    async acceptReq(requestId) {
-      try {
-        await acceptFriendRequest(requestId);
-        uni.showToast({ title: '已添加好友', icon: 'success' });
-        const req = this.requests.find((r) => r.id === requestId);
-        if (req) req.status = 1;
-      } catch (e) {
-        console.error('acceptFriendRequest failed:', e);
-      }
-    },
-    async rejectReq(requestId) {
-      try {
-        await rejectFriendRequest(requestId);
-        uni.showToast({ title: '已拒绝', icon: 'none' });
-        const req = this.requests.find((r) => r.id === requestId);
-        if (req) req.status = 2;
-      } catch (e) {
-        console.error('rejectFriendRequest failed:', e);
-      }
-    },
-    goBack() {
-      uni.navigateBack();
-    },
-  },
-};
+const requests = ref([]);
+const loading = ref(false);
+const refreshing = ref(false);
+const statusBarHeight = ref(0);
+
+onMounted(() => {
+  const systemInfo = uni.getSystemInfoSync();
+  statusBarHeight.value = systemInfo.statusBarHeight || 20;
+});
+
+onShow(() => {
+  loadRequests();
+});
+
+async function loadRequests() {
+  loading.value = true;
+  try {
+    const res = await getPendingFriendRequests();
+    requests.value = res.data || [];
+  } catch (e) {
+    console.error('loadRequests failed:', e);
+  } finally {
+    loading.value = false;
+    refreshing.value = false;
+  }
+}
+
+function onRefresh() {
+  refreshing.value = true;
+  loadRequests();
+}
+
+async function acceptReq(requestId) {
+  try {
+    await acceptFriendRequest(requestId);
+    uni.showToast({ title: '已添加好友', icon: 'success' });
+    const req = requests.value.find((r) => r.id === requestId);
+    if (req) req.status = 1;
+  } catch (e) {
+    console.error('acceptFriendRequest failed:', e);
+  }
+}
+
+async function rejectReq(requestId) {
+  try {
+    await rejectFriendRequest(requestId);
+    uni.showToast({ title: '已拒绝', icon: 'none' });
+    const req = requests.value.find((r) => r.id === requestId);
+    if (req) req.status = 2;
+  } catch (e) {
+    console.error('rejectFriendRequest failed:', e);
+  }
+}
+
+function goBack() {
+  uni.navigateBack();
+}
 </script>
 
 <style lang="scss" scoped>
 page { background-color: #f5f5f5; }
 .friend-requests-page { height: 100vh; background-color: #f5f5f5; display: flex; flex-direction: column; }
-.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; padding: 0 20rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; }
-.nav-back { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; margin-right: 8rpx; }
+.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; padding: 0 20rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; box-sizing: border-box; }
+.nav-back { display: flex; align-items: center; }
 .back-icon { width: 40rpx; height: 40rpx; }
-.nav-title { font-size: 36rpx; font-weight: 600; color: #111; }
-
+.nav-title { flex: 1; text-align: center; font-size: 34rpx; font-weight: 600; color: #111111; margin-right: 40rpx; }
 .request-list { flex: 1; background-color: #ffffff; }
-.request-item { display: flex; align-items: center; min-height: 120rpx; padding: 16rpx 20rpx; border-bottom: 1rpx solid #e5e5e5; }
+.request-item { display: flex; align-items: center; padding: 24rpx 30rpx; border-bottom: 1rpx solid #f0f0f0; }
 .request-avatar-wrap { margin-right: 24rpx; flex-shrink: 0; }
 .request-avatar { width: 80rpx; height: 80rpx; border-radius: 12rpx; background-color: #f5f5f5; }
 .request-avatar-placeholder { width: 80rpx; height: 80rpx; border-radius: 12rpx; background-color: #10aeff; display: flex; align-items: center; justify-content: center; }
 .avatar-text { font-size: 36rpx; font-weight: 600; color: #ffffff; }
 .request-info { flex: 1; display: flex; flex-direction: column; }
-.request-name { font-size: 32rpx; color: #111; }
-.request-msg { font-size: 24rpx; color: #999; margin-top: 4rpx; }
-.request-actions { display: flex; gap: 16rpx; flex-shrink: 0; }
-.btn-accept { padding: 12rpx 28rpx; background-color: #07c160; border-radius: 12rpx; }
-.btn-accept text { font-size: 24rpx; color: #ffffff; }
-.btn-reject { padding: 12rpx 28rpx; background-color: #e5e5e5; border-radius: 12rpx; }
-.btn-reject text { font-size: 24rpx; color: #666; }
-.request-status { flex-shrink: 0; }
+.request-name { font-size: 32rpx; color: #111; margin-bottom: 8rpx; }
+.request-msg { font-size: 26rpx; color: #999; }
+.request-actions { display: flex; gap: 16rpx; }
+.btn-accept { padding: 12rpx 32rpx; background-color: #07c160; border-radius: 12rpx; }
+.btn-accept text { font-size: 26rpx; color: #ffffff; }
+.btn-reject { padding: 12rpx 32rpx; background-color: #f5f5f5; border-radius: 12rpx; }
+.btn-reject text { font-size: 26rpx; color: #666; }
+.request-status { }
 .status-accepted { font-size: 26rpx; color: #07c160; }
 .status-rejected { font-size: 26rpx; color: #999; }
 .empty-tip { text-align: center; padding: 100rpx 40rpx; font-size: 28rpx; color: #999; }

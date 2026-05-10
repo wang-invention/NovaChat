@@ -64,9 +64,7 @@ const PATHS = {
 
 const toDataUri = (inner, color, strokeWidth) => {
   const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"` +
-    ` fill="none" stroke="${color}" stroke-width="${strokeWidth}"` +
-    ` stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
   return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
 };
 

@@ -49,6 +49,14 @@
       }
     },
     {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#F7F8FA"
+      }
+    },
+    {
       "path": "pages/contacts/friend-requests",
       "style": {
         "navigationStyle": "custom",

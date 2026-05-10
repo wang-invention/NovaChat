@@ -2,6 +2,7 @@ package com.wang.novachat.user.service;
 
 import com.wang.novachat.user.dto.UserLoginDTO;
 import com.wang.novachat.user.dto.UserRegisterDTO;
+import com.wang.novachat.user.dto.UserUpdateDTO;
 import com.wang.novachat.user.vo.DeviceVO;
 import com.wang.novachat.user.vo.LoginVO;
 import com.wang.novachat.user.vo.UserVO;
@@ -69,6 +70,14 @@ public interface UserService {
      * @param userId 用户 ID（从网关透传头获取）
      */
     UserVO getCurrentUser(Long userId);
+
+    /**
+     * 更新当前登录用户的信息。
+     *
+     * @param userId 用户 ID
+     * @param dto 更新参数
+     */
+    void updateProfile(Long userId, UserUpdateDTO dto);
 
     List<UserVO> searchUsers(String keyword);
 }

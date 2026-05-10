@@ -45,7 +45,9 @@ public class ChatServiceImpl implements ChatService {
         message.setReceiverId(dto.getReceiverId());
         message.setType(dto.getType());
         message.setContent(dto.getContent() != null ? dto.getContent() : "");
-        message.setImageUrl(dto.getImageUrl() != null ? dto.getImageUrl() : "");
+        message.setImageUrl(dto.getThumbUrl() != null ? dto.getThumbUrl() : (dto.getImageUrl() != null ? dto.getImageUrl() : ""));
+        message.setThumbUrl(dto.getThumbUrl() != null ? dto.getThumbUrl() : "");
+        message.setOriginUrl(dto.getOriginUrl() != null ? dto.getOriginUrl() : "");
         message.setQuoteId(dto.getQuoteId());
         message.setRecalled(0);
         messageMapper.insert(message);

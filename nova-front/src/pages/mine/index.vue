@@ -5,17 +5,13 @@
       <text class="nav-title">我的</text>
       <view class="nav-right">
         <view class="icon-btn" @click="handleSearch">
-          <svg class="icon-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-            <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <svg-icon class="icon-svg-small" icon="<circle cx='11' cy='11' r='8' stroke='currentColor' stroke-width='2'/>
+            <path d='M21 21L16.65 16.65' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>" />
         </view>
         <view class="icon-btn" @click="handleMore">
-          <svg class="icon-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="1" fill="currentColor"/>
-            <circle cx="19" cy="12" r="1" fill="currentColor"/>
-            <circle cx="5" cy="12" r="1" fill="currentColor"/>
-          </svg>
+          <svg-icon class="icon-svg-small" icon="<circle cx='12' cy='12' r='1' fill='currentColor'/>
+            <circle cx='19' cy='12' r='1' fill='currentColor'/>
+            <circle cx='5' cy='12' r='1' fill='currentColor'/>" />
         </view>
       </view>
     </view>
@@ -39,12 +35,10 @@
           </view>
         </view>
         <view class="user-qrcode" v-if="isLogin">
-          <svg class="qrcode-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-            <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-            <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-            <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-          </svg>
+          <svg-icon class="qrcode-icon" icon="<rect x='3' y='3' width='7' height='7' stroke='currentColor' stroke-width='2'/>
+            <rect x='14' y='3' width='7' height='7' stroke='currentColor' stroke-width='2'/>
+            <rect x='14' y='14' width='7' height='7' stroke='currentColor' stroke-width='2'/>
+            <rect x='3' y='14' width='7' height='7' stroke='currentColor' stroke-width='2'/>" size="7" />
         </view>
       </view>
 
@@ -55,16 +49,12 @@
       <view class="mine-section">
         <view class="mine-item">
           <view class="item-icon" style="background-color: #07C160;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
-              <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="2"/>
-            </svg>
+            <svg-icon class="icon-svg" icon="<rect x='2' y='5' width='20' height='14' rx='2' stroke='currentColor' stroke-width='2'/>
+              <line x1='2' y1='10' x2='22' y2='10' stroke='currentColor' stroke-width='2'/>" width="20" height="14" />
           </view>
           <text class="item-name">支付</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
         </view>
       </view>
@@ -76,65 +66,49 @@
       <view class="mine-section">
         <view class="mine-item">
           <view class="item-icon" style="background-color: #10AEFF;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="icon-svg" icon="<polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
           <text class="item-name">收藏</text>
           <text class="item-extra">128</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
         </view>
         <view class="mine-item">
           <view class="item-icon" style="background-color: #FA9D3B;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-              <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="9" y1="9" x2="9.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="15" y1="9" x2="15.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="icon-svg" icon="<circle cx='12' cy='12' r='10' stroke='currentColor' stroke-width='2'/>
+              <path d='M8 14s1.5 2 4 2 4-2 4-2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+              <line x1='9' y1='9' x2='9.01' y2='9' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+              <line x1='15' y1='9' x2='15.01' y2='9' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
           <text class="item-name">朋友圈</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
         </view>
         <view class="mine-item">
           <view class="item-icon" style="background-color: #FF6B6B;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
-              <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
-              <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
-              <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-            </svg>
+            <svg-icon class="icon-svg" icon="<rect x='3' y='4' width='18' height='16' rx='2' stroke='currentColor' stroke-width='2'/>
+              <line x1='16' y1='2' x2='16' y2='6' stroke='currentColor' stroke-width='2'/>
+              <line x1='8' y1='2' x2='8' y2='6' stroke='currentColor' stroke-width='2'/>
+              <line x1='3' y1='10' x2='21' y2='10' stroke='currentColor' stroke-width='2'/>" width="18" height="16" />
           </view>
           <text class="item-name">卡包</text>
           <text class="item-extra">5张优惠券</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
         </view>
         <view class="mine-item">
           <view class="item-icon" style="background-color: #9C27B0;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-              <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="9" y1="9" x2="9.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="15" y1="9" x2="15.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="icon-svg" icon="<circle cx='12' cy='12' r='10' stroke='currentColor' stroke-width='2'/>
+              <path d='M8 14s1.5 2 4 2 4-2 4-2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+              <line x1='9' y1='9' x2='9.01' y2='9' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+              <line x1='15' y1='9' x2='15.01' y2='9' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
           <text class="item-name">表情</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
         </view>
       </view>
@@ -146,16 +120,12 @@
       <view class="mine-section">
         <view class="mine-item" @click="goToSettings">
           <view class="item-icon" style="background-color: #607D8B;">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="icon-svg" icon="<circle cx='12' cy='12' r='3' stroke='currentColor' stroke-width='2'/>
+              <path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
           <text class="item-name">设置</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
           </view>
         </view>
       </view>
@@ -165,14 +135,12 @@
       <view class="mine-section">
         <view class="mine-item" v-for="(item, index) in moreItems" :key="index" @click="handleMoreItem(item)">
           <view class="item-icon" :style="{ backgroundColor: item.color }">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" v-html="item.icon"></svg>
+            <svg-icon class="icon-svg" :icon="item.icon" size="48" color="#ffffff" />
           </view>
           <text class="item-name">{{ item.name }}</text>
           <text class="item-extra" v-if="item.extra">{{ item.extra }}</text>
           <view class="item-arrow">
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg-icon class="arrow-icon" icon="<polyline points='9 18 15 12 9 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" size="32" color="#999999" />
           </view>
         </view>
       </view>
@@ -190,14 +158,14 @@
     </scroll-view>
 
     <!-- 底部 TabBar - 固定 -->
-    <custom-tab-bar current="me" />
+    <my-tab-bar current="me" />
   </view>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
-import CustomTabBar from '@/components/custom-tab-bar/custom-tab-bar.vue';
+import MyTabBar from '@/components/my-tab-bar/my-tab-bar.vue';
 import { getCurrentUser, logout } from '@/api/user';
 
 // 响应式数据
@@ -275,7 +243,6 @@ const fetchUserInfo = async () => {
     const res = await getCurrentUser();
     if (res.code === 200 && res.data) {
       Object.assign(userInfo, res.data);
-      // 更新本地存储
       uni.setStorageSync('userInfo', {
         id: res.data.id,
         username: res.data.username,

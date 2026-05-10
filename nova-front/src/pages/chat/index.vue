@@ -3,13 +3,13 @@
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
     <view class="nav-bar">
       <view class="nav-back" @click="goBack">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg-icon class="nav-icon" icon="<path d='M15 18L9 12L15 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
       </view>
       <view class="nav-center">
         <text class="nav-title">{{ chatName }}</text>
       </view>
       <view class="nav-more" @click="toggleSettings">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
+        <svg-icon class="nav-icon" icon="<circle cx='12' cy='5' r='1.5' fill='currentColor'/><circle cx='12' cy='12' r='1.5' fill='currentColor'/><circle cx='12' cy='19' r='1.5' fill='currentColor'/>" />
       </view>
     </view>
 
@@ -25,12 +25,12 @@
       <view class="message-list-inner">
         <view class="welcome-tip" v-if="messages.length === 0 && chatType === 'ai'">
           <view class="welcome-icon">
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/></svg>
+            <svg-icon icon="<rect x='3' y='11' width='18' height='10' rx='2' stroke='currentColor' stroke-width='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4' stroke='currentColor' stroke-width='2'/><circle cx='9' cy='16' r='1' fill='currentColor'/><circle cx='15' cy='16' r='1' fill='currentColor'/>" size="40" />
           </view>
           <text class="welcome-text">你好！我是 Nova AI 助手，有什么可以帮你的吗？</text>
         </view>
 
-        <template v-for="(msg, index) in messages" :key="msg.id">
+        <view v-for="(msg, index) in messages" :key="msg.id">
           <view class="time-tip" v-if="shouldShowTimestamp(messages, index)">
             <text class="time-text">{{ formatTime(msg.timestamp) }}</text>
           </view>
@@ -48,7 +48,7 @@
           >
             <template v-if="msg.role === 'other' || msg.role === 'assistant'">
               <view class="avatar other-avatar" v-if="chatType === 'ai'">
-                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/></svg>
+                <svg-icon icon="<rect x='3' y='11' width='18' height='10' rx='2' stroke='currentColor' stroke-width='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4' stroke='currentColor' stroke-width='2'/><circle cx='9' cy='16' r='1' fill='currentColor'/><circle cx='15' cy='16' r='1' fill='currentColor'/>" size="40" />
               </view>
               <image v-else class="avatar-img" :src="targetAvatar || ''" mode="aspectFill" />
               <view class="bubble-wrap">
@@ -57,7 +57,15 @@
                 </view>
                 <view class="bubble other-bubble" v-if="!msg.recalled">
                   <text class="bubble-text" v-if="msg.type === 'text'">{{ msg.content }}</text>
-                  <image class="bubble-image" v-else-if="msg.type === 'image'" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg.imageUrl)" />
+                  <view class="image-wrap" v-else-if="msg.type === 'image'">
+                    <image class="bubble-image" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg)" @longpress="onImageLongPress(msg)" />
+                    <view class="upload-overlay" v-if="msg.uploading">
+                      <text class="upload-text">上传中...</text>
+                    </view>
+                    <view class="failed-overlay" v-else-if="msg.status === 'failed'">
+                      <text class="failed-text">上传失败</text>
+                    </view>
+                  </view>
                   <text class="bubble-emoji" v-else-if="msg.type === 'emoji'">{{ msg.content }}</text>
                   <view class="typing-cursor" v-if="msg.typing"></view>
                 </view>
@@ -72,25 +80,33 @@
                 </view>
                 <view class="bubble user-bubble" v-if="!msg.recalled">
                   <text class="bubble-text" v-if="msg.type === 'text'">{{ msg.content }}</text>
-                  <image class="bubble-image" v-else-if="msg.type === 'image'" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg.imageUrl)" />
+                  <view class="image-wrap" v-else-if="msg.type === 'image'">
+                    <image class="bubble-image" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg)" @longpress="onImageLongPress(msg)" />
+                    <view class="upload-overlay" v-if="msg.uploading">
+                      <text class="upload-text">上传中...</text>
+                    </view>
+                    <view class="failed-overlay" v-else-if="msg.status === 'failed'">
+                      <text class="failed-text">上传失败</text>
+                    </view>
+                  </view>
                   <text class="bubble-emoji" v-else-if="msg.type === 'emoji'">{{ msg.content }}</text>
                 </view>
                 <view class="recalled-tip" v-else><text>你撤回了一条消息</text></view>
                 <view class="status-row" v-if="!msg.recalled">
                   <view class="status-sending" v-if="msg.status === 'sending'"><view class="spinner"></view></view>
                   <view class="status-failed" v-else-if="msg.status === 'failed'" @click.stop="retrySend(msg)">
-                    <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="12" r="10" stroke="#ff3b30" stroke-width="2"/><path d="M12 8V12L15 15" stroke="#ff3b30" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg-icon icon="<circle cx='12' cy='12' r='10' stroke='#ff3b30' stroke-width='2'/><path d='M12 8V12L15 15' stroke='#ff3b30' stroke-width='2' stroke-linecap='round'/>" size="16" color="#ff3b30" />
                     <text class="failed-text">重发</text>
                   </view>
                 </view>
               </view>
               <image v-if="myAvatar" class="avatar-img" :src="myAvatar" mode="aspectFill" />
               <view v-else class="avatar user-avatar">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                <svg-icon icon="<path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><circle cx='12' cy='7' r='4' stroke='currentColor' stroke-width='2'/>" />
               </view>
             </template>
           </view>
-        </template>
+        </view>
 
         <view id="msg-bottom" class="scroll-bottom"></view>
       </view>
@@ -101,7 +117,7 @@
         <text class="quote-label">回复：</text>
         <text class="quote-preview">{{ quoteMsg.content || '[图片]' }}</text>
         <view class="quote-close" @click="quoteMsg = null">
-          <svg viewBox="0 0 24 24" fill="none" width="28rpx" height="28rpx"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg-icon icon="<path d='M18 6L6 18M6 6l12 12' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>" size="28" />
         </view>
       </view>
     </view>
@@ -109,21 +125,16 @@
     <view class="input-area">
       <view class="input-toolbar">
         <view class="tool-btn" @click="toggleEmojiPanel">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>
+          <svg-icon icon="<circle cx='12' cy='12' r='10' stroke='currentColor' stroke-width='2'/><path d='M8 14s1.5 2 4 2 4-2 4-2' stroke='currentColor' stroke-width='2' stroke-linecap='round'/><circle cx='9' cy='9' r='1' fill='currentColor'/><circle cx='15' cy='9' r='1' fill='currentColor'/>" />
         </view>
         <view class="tool-btn" @click="pickImage">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="2"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg-icon icon="<rect x='3' y='3' width='18' height='18' rx='2' stroke='currentColor' stroke-width='2'/><circle cx='8.5' cy='8.5' r='1.5' stroke='currentColor' stroke-width='2'/><path d='M21 15l-5-5L5 21' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
         </view>
       </view>
       <view class="input-row">
         <input class="msg-input" v-model="inputText" placeholder="输入消息..." placeholder-class="input-placeholder" :disabled="isStreaming" confirm-type="send" @confirm="sendTextMsg" @focus="onInputFocus" />
         <view class="send-btn" :class="{ active: canSend }" @click="sendTextMsg">
-          <!-- #ifdef H5 -->
-          <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <!-- #endif -->
-          <!-- #ifndef H5 -->
-          <uni-icons type="paperplane" size="20" color="#fff"></uni-icons>
-          <!-- #endif -->
+          <svg-icon class="send-icon" icon="<path d='M22 2L11 13' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M22 2L15 22L11 13L2 9L22 2Z' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
         </view>
       </view>
     </view>
@@ -168,6 +179,7 @@ import { ref, computed, nextTick, onMounted, onUnmounted } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { chatCompletionStream } from "@/api/chat";
 import { sendMessage, getMessages, recallMessage, deleteMessage, markRead, getConversationId } from "@/api/im";
+import { uploadImage } from "@/api/user";
 import { connectWS, sendWSMessage, onWSMessage } from "@/utils/websocket";
 import { getStatusBarHeight } from "@/utils/safe-area";
 import {
@@ -261,7 +273,9 @@ function serverMsgToLocal(serverMsg, role) {
     role: role,
     type: serverMsg.type || "text",
     content: serverMsg.content || "",
-    imageUrl: serverMsg.imageUrl || "",
+    imageUrl: serverMsg.thumbUrl || serverMsg.imageUrl || "",
+    thumbUrl: serverMsg.thumbUrl || "",
+    originUrl: serverMsg.originUrl || serverMsg.imageUrl || "",
     status: MSG_STATUS.SENT,
     timestamp: serverMsg.createTime ? new Date(serverMsg.createTime).getTime() : Date.now(),
     recalled: serverMsg.recalled === 1,
@@ -310,7 +324,7 @@ function goBack() {
   if (pages.length > 1) {
     uni.navigateBack();
   } else {
-    uni.switchTab({ url: "/pages/home/index", fail: () => { uni.reLaunch({ url: "/pages/home/index" }); } });
+    uni.reLaunch({ url: "/pages/home/index" });
   }
 }
 
@@ -353,16 +367,34 @@ function pickImage() {
     success: (res) => {
       const tempUrl = res.tempFilePaths[0];
       const msg = createImageMsg("user", tempUrl, { quoteId: quoteMsg.value?.id || null });
+      msg.status = MSG_STATUS.SENDING;
+      msg.uploading = true;
       quoteMsg.value = null;
       messages.value.push(msg);
       scrollToBottom();
 
-      if (chatType.value === "ai") {
-        msg.status = MSG_STATUS.SENT;
-        requestAIReply(msg);
-      } else {
-        sendSingleChatMsg(msg);
-      }
+      uploadImage(tempUrl)
+        .then((result) => {
+          const thumbUrl = result.data?.thumbUrl || result.thumbUrl || result.data?.url || result.url;
+          const originUrl = result.data?.url || result.url;
+          msg.thumbUrl = thumbUrl;
+          msg.imageUrl = thumbUrl;
+          msg.originUrl = originUrl;
+          msg.uploading = false;
+          msg.status = MSG_STATUS.SENT;
+
+          if (chatType.value === "ai") {
+            requestAIReply(msg);
+          } else {
+            sendSingleChatMsg(msg);
+          }
+        })
+        .catch((err) => {
+          console.error('图片上传失败', err);
+          msg.uploading = false;
+          msg.status = MSG_STATUS.FAILED;
+          uni.showToast({ title: "图片上传失败", icon: "none" });
+        });
     },
     fail: () => {},
   });
@@ -383,7 +415,8 @@ async function sendSingleChatMsg(localMsg) {
       to: targetUserId.value,
       msgType: localMsg.type,
       content: localMsg.content,
-      imageUrl: localMsg.imageUrl,
+      imageUrl: localMsg.thumbUrl || localMsg.imageUrl,
+      originUrl: localMsg.originUrl,
       quoteId: localMsg.quoteId || null,
     });
 
@@ -452,6 +485,22 @@ function onMsgLongPress(msg) {
   contextMenu.value = { visible: true, msg, x: 60, y: 200 };
 }
 
+function onImageLongPress(msg) {
+  uni.showActionSheet({
+    itemList: ['保存图片', '复制图片地址'],
+    success: (res) => {
+      if (res.tapIndex === 0) {
+        downloadImage(msg);
+      } else if (res.tapIndex === 1) {
+        uni.setClipboardData({
+          data: msg.originUrl || msg.imageUrl,
+          success: () => uni.showToast({ title: '已复制', icon: 'success' })
+        });
+      }
+    }
+  });
+}
+
 function closeContextMenu() { contextMenu.value.visible = false; }
 
 function doCopy() {
@@ -512,7 +561,38 @@ function getQuoteMsg(msg) {
   return messages.value.find((m) => m.id === msg.quoteId);
 }
 
-function previewImage(url) { uni.previewImage({ urls: [url], current: url }); }
+function previewImage(msg) {
+  const urls = msg.originUrl ? [msg.originUrl] : [msg.imageUrl];
+  uni.previewImage({ urls: urls, current: urls[0] });
+}
+
+function downloadImage(msg) {
+  const url = msg.originUrl || msg.imageUrl;
+  if (!url) return;
+  uni.showLoading({ title: '下载中...' });
+  uni.download({
+    url: url,
+    success: (res) => {
+      if (res.statusCode === 200) {
+        uni.saveImageToPhotosAlbum({
+          filePath: res.tempFilePath,
+          success: () => {
+            uni.hideLoading();
+            uni.showToast({ title: '保存成功', icon: 'success' });
+          },
+          fail: () => {
+            uni.hideLoading();
+            uni.showToast({ title: '保存失败', icon: 'none' });
+          }
+        });
+      }
+    },
+    fail: () => {
+      uni.hideLoading();
+      uni.showToast({ title: '下载失败', icon: 'none' });
+    }
+  });
+}
 
 function onScrollToUpper() {
   if (chatType.value === "single" && conversationId.value) {
@@ -640,6 +720,21 @@ page { background-color: #f5f5f5; }
 .user-bubble { background-color: #95ec69; border-top-right-radius: 4rpx; }
 .bubble-text { font-size: 30rpx; line-height: 1.6; color: #1a1a1a; }
 .bubble-image { max-width: 400rpx; border-radius: 8rpx; }
+.image-wrap { position: relative; display: inline-block; }
+.upload-overlay, .failed-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+}
+.upload-text, .failed-text { color: #fff; font-size: 24rpx; }
+.failed-text { color: #ff3b30; }
 .bubble-emoji { font-size: 64rpx; }
 .typing-cursor { display: inline-block; width: 4rpx; height: 30rpx; background: #999; margin-left: 4rpx; animation: blink 0.8s infinite; vertical-align: middle; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
@@ -657,10 +752,10 @@ page { background-color: #f5f5f5; }
 .quote-close { margin-left: 12rpx; flex-shrink: 0; color: #999; }
 .input-area { flex-shrink: 0; padding: 16rpx 24rpx; background: #ffffff; border-top: 1rpx solid #e5e5e5; display: flex; flex-direction: column; gap: 12rpx; }
 .input-toolbar { display: flex; gap: 20rpx; }
-.tool-btn { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; svg { width: 40rpx; height: 40rpx; color: #666; } }
+.tool-btn { width: 80rpx; height: 80rpx; display: flex; align-items: center; justify-content: center; svg { width: 48rpx; height: 48rpx; color: #666; } }
 .input-row { display: flex; align-items: center; gap: 16rpx; }
 .msg-input { flex: 1; height: 72rpx; background: #f5f5f5; border-radius: 16rpx; padding: 0 24rpx; font-size: 30rpx; }
-.send-btn { width: 72rpx; height: 72rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #ccc; svg { width: 36rpx; height: 36rpx; color: #fff; } &.active { background: #07c160; } }
+.send-btn { width: 80rpx; height: 80rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #cccccc; .send-icon { width: 40rpx; height: 40rpx; color: #ffffff; } &.active { background: #07c160; } }
 .emoji-panel { flex-shrink: 0; height: 420rpx; background: #f5f5f5; border-top: 1rpx solid #e5e5e5; }
 .emoji-scroll { height: 100%; }
 .emoji-grid { display: flex; flex-wrap: wrap; padding: 16rpx; }

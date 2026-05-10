@@ -26,6 +26,10 @@ public class MessageVO implements Serializable {
 
     private String imageUrl;
 
+    private String thumbUrl;
+
+    private String originUrl;
+
     private Long quoteId;
 
     private Integer recalled;
@@ -43,5 +47,7 @@ public class MessageVO implements Serializable {
         private String type;
         private String content;
         private String imageUrl;
+        private String thumbUrl;
+        private String originUrl;
     }
 }

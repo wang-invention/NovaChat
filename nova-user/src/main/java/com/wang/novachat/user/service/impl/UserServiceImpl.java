@@ -12,6 +12,7 @@ import com.wang.novachat.common.security.LoginSessionService;
 import com.wang.novachat.common.utils.PasswordUtils;
 import com.wang.novachat.user.dto.UserLoginDTO;
 import com.wang.novachat.user.dto.UserRegisterDTO;
+import com.wang.novachat.user.dto.UserUpdateDTO;
 import com.wang.novachat.user.entity.User;
 import com.wang.novachat.user.mapper.UserMapper;
 import com.wang.novachat.user.service.UserService;
@@ -214,6 +215,40 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.USER_NOT_EXIST);
         }
         return toVO(user);
+    }
+
+    @Override
+    public void updateProfile(Long userId, UserUpdateDTO dto) {
+        if (userId == null) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED, "未登录");
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+
+        User update = new User();
+        update.setId(userId);
+        update.setVersion(user.getVersion());
+
+        if (dto.getNickname() != null) {
+            update.setNickname(dto.getNickname());
+        }
+        if (dto.getAvatar() != null) {
+            update.setAvatar(dto.getAvatar());
+        }
+        if (dto.getPhone() != null) {
+            update.setPhone(dto.getPhone());
+        }
+        if (dto.getEmail() != null) {
+            update.setEmail(dto.getEmail());
+        }
+        if (dto.getGender() != null) {
+            update.setGender(dto.getGender());
+        }
+
+        userMapper.updateById(update);
+        log.info("[更新用户资料] userId={}", userId);
     }
 
     @Override

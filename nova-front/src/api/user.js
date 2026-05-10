@@ -57,3 +57,89 @@ export function logoutAll() {
 export function getLoginDevices() {
   return http.get("/user/users/devices");
 }
+
+/**
+ * 更新用户基本信息
+ * @param {Object} payload - 更新参数
+ * @param {string} payload.nickname - 昵称
+ * @param {string} payload.gender - 性别 0-未知 1-男 2-女
+ * @param {string} payload.email - 邮箱
+ * @param {string} payload.phone - 手机号
+ */
+export function updateUserProfile(payload) {
+  return http.post("/user/users/profile", payload);
+}
+
+/**
+ * 上传用户头像
+ * @param {string} filePath - 头像文件路径
+ */
+export function uploadAvatar(filePath) {
+  return new Promise((resolve, reject) => {
+    const token = uni.getStorageSync("token") || "";
+    uni.uploadFile({
+      url: "http://129.211.0.210:8080/api/user/users/avatar",
+      filePath: filePath,
+      name: "file",
+      header: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: (res) => {
+        const data = JSON.parse(res.data || "{}");
+        if (data.code === 200 || data.code === 0) {
+          resolve(data);
+        } else {
+          uni.showToast({
+            title: data.message || "上传失败",
+            icon: "none",
+          });
+          reject(data);
+        }
+      },
+      fail: (err) => {
+        uni.showToast({
+          title: "上传失败，请稍后重试",
+          icon: "none",
+        });
+        reject(err);
+      },
+    });
+  });
+}
+
+/**
+ * 上传聊天图片
+ * @param {string} filePath - 图片文件路径
+ */
+export function uploadImage(filePath) {
+  return new Promise((resolve, reject) => {
+    const token = uni.getStorageSync("token") || "";
+    uni.uploadFile({
+      url: "http://129.211.0.210:8080/api/user/users/image",
+      filePath: filePath,
+      name: "file",
+      header: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: (res) => {
+        const data = JSON.parse(res.data || "{}");
+        if (data.code === 200 || data.code === 0) {
+          resolve(data);
+        } else {
+          uni.showToast({
+            title: data.message || "上传失败",
+            icon: "none",
+          });
+          reject(data);
+        }
+      },
+      fail: (err) => {
+        uni.showToast({
+          title: "上传失败，请稍后重试",
+          icon: "none",
+        });
+        reject(err);
+      },
+    });
+  });
+}

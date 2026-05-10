@@ -4,8 +4,11 @@ import com.wang.novachat.common.constant.CommonConstant;
 import com.wang.novachat.common.result.Result;
 import com.wang.novachat.common.result.ResultCode;
 import com.wang.novachat.common.utils.IpUtils;
+import com.wang.novachat.user.dto.FileUploadResult;
 import com.wang.novachat.user.dto.UserLoginDTO;
 import com.wang.novachat.user.dto.UserRegisterDTO;
+import com.wang.novachat.user.dto.UserUpdateDTO;
+import com.wang.novachat.user.service.FileService;
 import com.wang.novachat.user.service.UserService;
 import com.wang.novachat.user.vo.DeviceVO;
 import com.wang.novachat.user.vo.LoginVO;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,10 +34,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserService userService;
+    private final FileService fileService;
+
     /** 客户端设备类型请求头（可选） */
     private static final String HEADER_X_DEVICE_TYPE = "X-Device-Type";
-
-    private final UserService userService;
 
     @PostMapping("/register")
     public Result<UserVO> register(@Valid @RequestBody UserRegisterDTO dto,
@@ -102,6 +107,30 @@ public class UserController {
     public Result<UserVO> getCurrentUser(HttpServletRequest request) {
         Long userId = requireUserId(request);
         return Result.success(userService.getCurrentUser(userId));
+    }
+
+    @PostMapping("/profile")
+    public Result<Void> updateProfile(@RequestBody UserUpdateDTO dto,
+                                      HttpServletRequest request) {
+        Long userId = requireUserId(request);
+        userService.updateProfile(userId, dto);
+        return Result.success("更新成功", null);
+    }
+
+    @PostMapping("/avatar")
+    public Result<FileUploadResult> uploadAvatar(@RequestParam("file") MultipartFile file,
+                                                  HttpServletRequest request) {
+        Long userId = requireUserId(request);
+        FileUploadResult result = fileService.uploadAvatar(userId, file);
+        return Result.success("上传成功", result);
+    }
+
+    @PostMapping("/image")
+    public Result<FileUploadResult> uploadImage(@RequestParam("file") MultipartFile file,
+                                                HttpServletRequest request) {
+        Long userId = requireUserId(request);
+        FileUploadResult result = fileService.uploadImage(userId, file);
+        return Result.success("上传成功", result);
     }
 
     @GetMapping("/{userId}")

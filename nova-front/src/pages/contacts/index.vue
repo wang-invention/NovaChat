@@ -4,11 +4,11 @@
       <text class="nav-title">通讯录</text>
       <view class="nav-right">
         <view class="search-box" @click="showSearch = true">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg-icon class="search-icon" icon="<circle cx='11' cy='11' r='8' stroke='currentColor' stroke-width='2'/><path d='M21 21L16.65 16.65' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>" size="32" color="#999999" />
           <text class="search-placeholder">搜索用户</text>
         </view>
         <view class="add-friend-btn" @click="openSearchForAddFriend">
-          <svg viewBox="0 0 24 24" fill="none" width="40rpx" height="40rpx"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M20 8v6M17 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg-icon icon="<path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><circle cx='9' cy='7' r='4' stroke='currentColor' stroke-width='2'/><path d='M20 8v6M17 11h6' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>" size="40" color="#111111" />
         </view>
       </view>
     </view>
@@ -17,7 +17,7 @@
       <view class="func-entries">
         <view class="func-item" @click="goFriendRequests">
           <view class="func-icon" style="background-color: #ff9500;">
-            <svg viewBox="0 0 24 24" fill="none" width="40rpx" height="40rpx"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#fff" stroke-width="2"/><path d="M20 8v6M17 11h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg-icon icon="<path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><circle cx='9' cy='7' r='4' stroke='currentColor' stroke-width='2'/><path d='M20 8v6M17 11h6' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>" size="40" color="#ffffff" />
           </view>
           <text class="func-text">新的朋友</text>
           <view class="func-badge" v-if="pendingCount > 0">
@@ -101,143 +101,147 @@
       </view>
     </view>
 
-    <custom-tab-bar current="contacts" />
+    <my-tab-bar current="contacts" />
   </view>
 </template>
 
-<script>
-import CustomTabBar from '@/components/custom-tab-bar/custom-tab-bar.vue';
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
+import MyTabBar from '@/components/my-tab-bar/my-tab-bar.vue';
 import { searchUsers, getFriendList, getPendingFriendRequests, sendFriendRequest, isFriend } from '@/api/im';
 import { isLoggedIn } from '@/utils/auth';
 import { onWSMessage } from '@/utils/websocket';
 
-export default {
-  components: { CustomTabBar },
-  data() {
-    return {
-      friends: [],
-      loading: false,
-      refreshing: false,
-      pendingCount: 0,
-      showSearch: false,
-      searchKeyword: '',
-      searchResults: [],
-      searchSearched: false,
-      showAddFriend: false,
-      addFriendTarget: null,
-      addFriendMsg: '',
-      removeWSHandler: null,
-      statusBarHeight: 0,
-      navBarHeight: 0,
-    };
-  },
-  onShow() {
-    if (isLoggedIn()) {
-      this.loadFriends();
-      this.loadPendingCount();
-    }
-  },
-  onLoad() {
-    const systemInfo = uni.getSystemInfoSync();
-    this.statusBarHeight = systemInfo.statusBarHeight || 20;
-    this.navBarHeight = this.statusBarHeight + 44;
-    this.removeWSHandler = onWSMessage((data) => {
-      if (data.type === 'friend_request' || data.type === 'friend_accepted') {
-        this.loadPendingCount();
-        if (data.type === 'friend_accepted') {
-          this.loadFriends();
-        }
-      }
-    });
-  },
-  onUnload() {
-    if (this.removeWSHandler) this.removeWSHandler();
-  },
-  methods: {
-    async loadFriends() {
-      this.loading = true;
-      try {
-        const res = await getFriendList();
-        this.friends = res.data || [];
-      } catch (e) {
-        console.error('loadFriends failed:', e);
-      } finally {
-        this.loading = false;
-        this.refreshing = false;
-      }
-    },
-    async loadPendingCount() {
-      try {
-        const res = await getPendingFriendRequests();
-        this.pendingCount = (res.data || []).length;
-      } catch (e) {
-        console.error('loadPendingCount failed:', e);
-      }
-    },
-    onRefresh() {
-      this.refreshing = true;
-      this.loadFriends();
-      this.loadPendingCount();
-    },
-    openSearchForAddFriend() {
-      this.searchKeyword = '';
-      this.searchResults = [];
-      this.searchSearched = false;
-      this.showSearch = true;
-    },
-    async doSearch() {
-      if (!this.searchKeyword.trim()) return;
-      this.searchSearched = true;
-      try {
-        const res = await searchUsers(this.searchKeyword.trim());
-        const me = uni.getStorageSync('userInfo');
-        const myId = me?.userId;
-        const users = (res.data || []).filter((u) => u.id !== myId);
+const friends = ref([]);
+const loading = ref(false);
+const refreshing = ref(false);
+const pendingCount = ref(0);
+const showSearch = ref(false);
+const searchKeyword = ref('');
+const searchResults = ref([]);
+const searchSearched = ref(false);
+const showAddFriend = ref(false);
+const addFriendTarget = ref(null);
+const addFriendMsg = ref('');
+const statusBarHeight = ref(0);
 
-        const results = [];
-        for (const u of users) {
-          try {
-            const fr = await isFriend(u.id);
-            u.isFriend = fr.data === true;
-          } catch (e) {
-            u.isFriend = false;
-          }
-          results.push(u);
-        }
-        this.searchResults = results;
-      } catch (e) {
-        console.error('searchUsers failed:', e);
+let removeWSHandler = null;
+
+onMounted(() => {
+  const systemInfo = uni.getSystemInfoSync();
+  statusBarHeight.value = systemInfo.statusBarHeight || 20;
+  removeWSHandler = onWSMessage((data) => {
+    if (data.type === 'friend_request' || data.type === 'friend_accepted') {
+      loadPendingCount();
+      if (data.type === 'friend_accepted') {
+        loadFriends();
       }
-    },
-    openAddFriend(user) {
-      this.addFriendTarget = user;
-      this.addFriendMsg = '';
-      this.showAddFriend = true;
-    },
-    async doAddFriend() {
-      if (!this.addFriendTarget) return;
+    }
+  });
+});
+
+onUnmounted(() => {
+  if (removeWSHandler) removeWSHandler();
+});
+
+onShow(() => {
+  if (isLoggedIn()) {
+    loadFriends();
+    loadPendingCount();
+  }
+});
+
+async function loadFriends() {
+  loading.value = true;
+  try {
+    const res = await getFriendList();
+    friends.value = res.data || [];
+  } catch (e) {
+    console.error('loadFriends failed:', e);
+  } finally {
+    loading.value = false;
+    refreshing.value = false;
+  }
+}
+
+async function loadPendingCount() {
+  try {
+    const res = await getPendingFriendRequests();
+    pendingCount.value = (res.data || []).length;
+  } catch (e) {
+    console.error('loadPendingCount failed:', e);
+  }
+}
+
+function onRefresh() {
+  refreshing.value = true;
+  loadFriends();
+  loadPendingCount();
+}
+
+function openSearchForAddFriend() {
+  searchKeyword.value = '';
+  searchResults.value = [];
+  searchSearched.value = false;
+  showSearch.value = true;
+}
+
+async function doSearch() {
+  if (!searchKeyword.value.trim()) return;
+  searchSearched.value = true;
+  try {
+    const res = await searchUsers(searchKeyword.value.trim());
+    const me = uni.getStorageSync('userInfo');
+    const myId = me?.userId;
+    const users = (res.data || []).filter((u) => u.id !== myId);
+
+    const results = [];
+    for (const u of users) {
       try {
-        await sendFriendRequest({
-          targetUserId: this.addFriendTarget.id,
-          message: this.addFriendMsg || '我是你的好友',
-        });
-        uni.showToast({ title: '申请已发送', icon: 'success' });
-        this.showAddFriend = false;
-        this.showSearch = false;
+        const fr = await isFriend(u.id);
+        u.isFriend = fr.data === true;
       } catch (e) {
-        console.error('sendFriendRequest failed:', e);
+        u.isFriend = false;
       }
-    },
-    startChat(user) {
-      uni.navigateTo({
-        url: `/pages/chat/index?name=${encodeURIComponent(user.remark || user.nickname || user.username)}&chatType=single&targetUserId=${user.friendId}&targetAvatar=${encodeURIComponent(user.avatar || '')}`,
-      });
-    },
-    goFriendRequests() {
-      uni.navigateTo({ url: '/pages/contacts/friend-requests' });
-    },
-  },
-};
+      results.push(u);
+    }
+    searchResults.value = results;
+  } catch (e) {
+    console.error('searchUsers failed:', e);
+  }
+}
+
+function openAddFriend(user) {
+  addFriendTarget.value = user;
+  addFriendMsg.value = '';
+  showAddFriend.value = true;
+}
+
+async function doAddFriend() {
+  if (!addFriendTarget.value) return;
+  try {
+    await sendFriendRequest({
+      targetUserId: addFriendTarget.value.id,
+      message: addFriendMsg.value || '我是你的好友',
+    });
+    uni.showToast({ title: '申请已发送', icon: 'success' });
+    showAddFriend.value = false;
+    showSearch.value = false;
+  } catch (e) {
+    console.error('sendFriendRequest failed:', e);
+  }
+}
+
+function startChat(user) {
+  uni.navigateTo({
+    url: `/pages/chat/index?name=${encodeURIComponent(user.remark || user.nickname || user.username)}&chatType=single&targetUserId=${user.friendId}&targetAvatar=${encodeURIComponent(user.avatar || '')}`,
+  });
+}
+
+function goFriendRequests() {
+  uni.navigateTo({ url: '/pages/contacts/friend-requests' });
+}
 </script>
 
 <style lang="scss" scoped>

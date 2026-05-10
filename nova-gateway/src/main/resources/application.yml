@@ -26,6 +26,13 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: nova-ai
+          uri: http://129.211.0.210:8000
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - StripPrefix=2
+
 
           
 nova:

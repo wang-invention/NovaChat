@@ -62,6 +62,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 dto.setType(wsMsg.getMsgType() != null ? wsMsg.getMsgType() : "text");
                 dto.setContent(wsMsg.getContent());
                 dto.setImageUrl(wsMsg.getImageUrl());
+                dto.setThumbUrl(wsMsg.getThumbUrl());
+                dto.setOriginUrl(wsMsg.getOriginUrl());
                 dto.setQuoteId(wsMsg.getQuoteId());
 
                 MessageVO saved = chatService.sendMessage(senderId, dto);
@@ -134,6 +136,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         private String content;
         private String msgType;
         private String imageUrl;
+        private String thumbUrl;
+        private String originUrl;
         private Long quoteId;
         private Long messageId;
         private Long conversationId;

@@ -3,10 +3,10 @@
  */
 
 // #ifdef H5
-const WS_BASE_URL = `ws://192.168.1.101:8087/ws/chat`;
+const WS_BASE_URL = `ws://129.211.0.210:8087/ws/chat`;
 // #endif
 // #ifndef H5
-const WS_BASE_URL = "ws://192.168.1.101:8087/ws/chat";
+const WS_BASE_URL = "ws://129.211.0.210:8087/ws/chat";
 // #endif
 
 let socketTask = null;

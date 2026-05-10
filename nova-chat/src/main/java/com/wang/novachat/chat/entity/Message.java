@@ -35,6 +35,10 @@ public class Message implements Serializable {
 
     private String imageUrl;
 
+    private String thumbUrl;
+
+    private String originUrl;
+
     private Long quoteId;
 
     private Integer recalled;
