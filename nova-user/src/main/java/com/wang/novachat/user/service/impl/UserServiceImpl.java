@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserVO register(UserRegisterDTO dto, String registerIp) {
+    public LoginVO register(UserRegisterDTO dto, String registerIp) {
         if (existsByUsername(dto.getUsername())) {
             throw new BusinessException(ResultCode.USER_ALREADY_EXIST);
         }
@@ -83,13 +83,39 @@ public class UserServiceImpl implements UserService {
         try {
             userMapper.insert(user);
         } catch (DuplicateKeyException e) {
-            // 兜底并发场景：两个请求同名同时过了 existsByXxx 检查
             log.warn("注册并发冲突：{}", dto.getUsername(), e);
             throw new BusinessException(ResultCode.USER_ALREADY_EXIST);
         }
 
+        String deviceId = IdUtil.fastSimpleUUID();
+        String tokenId = IdUtil.fastSimpleUUID();
+        String token = jwtService.issueToken(user.getId(), user.getUsername(), tokenId, deviceId);
+        long ttlSeconds = jwtService.getExpireSeconds();
+        LocalDateTime now = LocalDateTime.now();
+
+        enforceMaxDevices(user.getId(), deviceId);
+
+        LoginSession session = LoginSession.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .deviceId(deviceId)
+                .ip(registerIp)
+                .loginAt(now)
+                .expireAt(now.plusSeconds(ttlSeconds))
+                .tokenId(tokenId)
+                .build();
+        loginSessionService.save(session, ttlSeconds);
+
         log.info("[用户注册] id={}, username={}", user.getId(), user.getUsername());
-        return toVO(user);
+
+        LoginVO vo = new LoginVO();
+        vo.setUserId(user.getId());
+        vo.setUsername(user.getUsername());
+        vo.setNickname(user.getNickname());
+        vo.setAvatar(user.getAvatar());
+        vo.setToken(token);
+        vo.setExpiresAt(System.currentTimeMillis() + ttlSeconds * 1000);
+        return vo;
     }
 
     @Override

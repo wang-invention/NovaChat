@@ -95,3 +95,13 @@ class ErrorResponse(BaseModel):
     code: int = Field(..., description="错误码")
     message: str = Field(..., description="错误信息")
     detail: Optional[str] = Field(default=None, description="详细错误信息")
+
+
+class PolishRequest(BaseModel):
+    """消息润色请求"""
+    text: str = Field(..., description="需要润色的原文", min_length=1, max_length=500)
+
+
+class PolishResponse(BaseModel):
+    """消息润色响应"""
+    results: List[str] = Field(..., description="润色结果列表，4个风格")

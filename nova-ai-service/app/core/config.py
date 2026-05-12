@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: str = Field(default="https://api.openai.com/v1", description="OpenAI Base URL")
     OPENAI_MODEL: str = Field(default="gpt-3.5-turbo", description="默认模型")
 
+    # DeepSeek 配置
+    DEEPSEEK_API_KEY: str = Field(default="", description="DeepSeek API Key")
+    DEEPSEEK_BASE_URL: str = Field(default="https://api.deepseek.com/v1", description="DeepSeek Base URL")
+    DEEPSEEK_MODEL: str = Field(default="deepseek-chat", description="默认模型")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

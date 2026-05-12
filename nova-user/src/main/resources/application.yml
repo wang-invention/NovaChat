@@ -60,3 +60,14 @@ logging:
   level:
     com.wang.novachat: debug
     com.wang.novachat.user.mapper: debug
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+  packages-to-scan: com.wang.novachat.user.controller
+  servers:
+    - url: http://129.211.0.210:8080/api/user
+      description: 网关公网地址

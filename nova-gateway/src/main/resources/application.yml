@@ -3,8 +3,6 @@ server:
   address: 0.0.0.0
 
 spring:
-
-
   cloud:
     gateway:
       discovery:
@@ -26,6 +24,11 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: nova-chat-websocket
+          uri: lb:ws://nova-chat
+          predicates:
+            - Path=/ws/chat/**
+
         - id: nova-ai
           uri: http://129.211.0.210:8000
           predicates:
@@ -33,8 +36,29 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: swagger-ui-redirect
+          uri: http://129.211.0.210:8000
+          predicates:
+            - Path=/swagger-ui.html
+          filters:
+            - RedirectTo=302,/webjars/swagger-ui/index.html
 
-          
+        - id: nova-user-api-docs
+          uri: lb://nova-user
+          predicates:
+            - Path=/v3/api-docs/user
+          filters:
+            - RewritePath=/v3/api-docs/user,/v3/api-docs
+
+        - id: nova-chat-api-docs
+          uri: lb://nova-chat
+          predicates:
+            - Path=/v3/api-docs/chat
+          filters:
+            - RewritePath=/v3/api-docs/chat,/v3/api-docs
+
+
+
 nova:
   # JWT 密钥须与 nova-user 一致，否则签名校验通不过
   jwt:
@@ -51,6 +75,24 @@ nova:
       - /api/user/users/login
       - /api/user/actuator/**
       - /actuator/**
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /swagger-ui.html
+      - /webjars/**
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    use-root-path: true
+    enabled: true
+    path: /swagger-ui
+    urls:
+      - url: /v3/api-docs/user
+        name: 用户服务
+      - url: /v3/api-docs/chat
+        name: 聊天服务
 
 logging:
   level:

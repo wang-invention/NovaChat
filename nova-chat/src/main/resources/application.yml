@@ -42,3 +42,14 @@ logging:
   level:
     com.wang.novachat: debug
     com.wang.novachat.chat.mapper: debug
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+  packages-to-scan: com.wang.novachat.chat.controller
+  overridden:
+    server: http://129.211.0.210:8080
+    context-path: /api/chat

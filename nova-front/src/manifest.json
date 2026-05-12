@@ -21,12 +21,16 @@
         "minSdkVersion": 21,
         "permissions": [
           "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+          "<uses-permission android:name=\"android.permission.RECORD_AUDIO\"/>",
           "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\"/>",
           "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>"
         ]
       },
       "ios": {
-        "dSYMs": false
+        "dSYMs": false,
+        "privacyDescription": {
+          "NSMicrophoneUsageDescription": "语音通话需要使用您的麦克风"
+        }
       },
       "sdkConfigs": {}
     }

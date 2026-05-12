@@ -140,7 +140,6 @@ export function chatCompletionStream(payload, { onChunk, onDone, onError }) {
   // #endif
 
   // #ifndef H5
-  // 小程序降级：使用普通请求
   let aborted = false;
 
   chatCompletion(payload)
@@ -162,4 +161,34 @@ export function chatCompletionStream(payload, { onChunk, onDone, onError }) {
     aborted = true;
   };
   // #endif
+}
+
+/**
+ * 消息润色
+ * @param {string} text - 需要润色的原文
+ * @returns {Promise<{results: string[]}>}
+ */
+export function polishMessage(text) {
+  return new Promise((resolve, reject) => {
+    const token = uni.getStorageSync("token") || "";
+    uni.request({
+      url: AI_BASE_URL + "/chat/polish",
+      method: "POST",
+      data: { text },
+      header: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          resolve(res.data);
+        } else {
+          reject(res.data || { message: "润色请求失败" });
+        }
+      },
+      fail: (err) => {
+        reject(err);
+      },
+    });
+  });
 }

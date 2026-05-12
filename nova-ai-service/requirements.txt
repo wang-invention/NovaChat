@@ -17,5 +17,13 @@ orjson==3.9.10
 # 日志
 structlog==24.1.0
 
+# AI 服务（LangChain + DeepSeek）
+langchain>=1.0.0
+langchain-core>=1.0.0
+langchain-openai>=1.0.0
+langgraph>=1.0.0
+langsmith>=0.1.0
+deepseek>=1.0.0
+
 # 开发调试（可选）
 # debugpy==1.8.0

@@ -4,7 +4,7 @@ AI 对话接口
 """
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from app.models.schemas import ChatRequest, ChatResponse, ErrorResponse
+from app.models.schemas import ChatRequest, ChatResponse, ErrorResponse, PolishRequest, PolishResponse
 from app.services.ai_service import ai_service
 
 router = APIRouter(prefix="/chat", tags=["AI 对话"])
@@ -87,4 +87,35 @@ async def chat_completions_stream(request: ChatRequest):
         raise HTTPException(
             status_code=500,
             detail=f"流式对话处理失败: {str(e)}"
+        )
+
+
+@router.post(
+    "/polish",
+    response_model=PolishResponse,
+    summary="AI 消息润色",
+    responses={
+        200: {"description": "润色成功", "model": PolishResponse},
+        400: {"description": "请求参数错误", "model": ErrorResponse},
+        500: {"description": "服务器内部错误", "model": ErrorResponse},
+    }
+)
+async def polish_message(request: PolishRequest):
+    """
+    AI 消息润色接口
+
+    将用户输入的消息润色成4种不同风格：
+    - 温柔亲切版
+    - 幽默轻松版
+    - 高情商版
+    - 简洁正式版
+
+    - **text**: 需要润色的原文
+    """
+    try:
+        return await ai_service.polish_message(request.text)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"消息润色失败: {str(e)}"
         )

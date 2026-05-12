@@ -15,12 +15,12 @@ import java.util.List;
 public interface UserService {
 
     /**
-     * 注册新用户，返回用户基础信息。
+     * 注册新用户，自动登录并返回用户信息 + Token。
      *
      * @param dto 注册参数
      * @param registerIp 注册 IP（Controller 从请求中取）
      */
-    UserVO register(UserRegisterDTO dto, String registerIp);
+    LoginVO register(UserRegisterDTO dto, String registerIp);
 
     /**
      * 账号密码登录，返回用户信息 + Token。

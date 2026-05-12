@@ -3,29 +3,41 @@
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
     <view class="nav-bar">
       <view class="nav-back" @click="goBack">
-        <svg-icon class="nav-icon" icon="<path d='M15 18L9 12L15 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
+        <svg-icon class="nav-icon"
+                  icon="<path d='M15 18L9 12L15 6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>"/>
       </view>
       <view class="nav-center">
         <text class="nav-title">{{ chatName }}</text>
       </view>
-      <view class="nav-more" @click="toggleSettings">
-        <svg-icon class="nav-icon" icon="<circle cx='12' cy='5' r='1.5' fill='currentColor'/><circle cx='12' cy='12' r='1.5' fill='currentColor'/><circle cx='12' cy='19' r='1.5' fill='currentColor'/>" />
+      <view class="nav-actions">
+        <view class="nav-more" v-if="chatType === 'single'" @click="startVoiceCall">
+          <svg-icon class="nav-icon"
+                    icon="<path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z' fill='currentColor'/>"/>
+        </view>
+        <view class="nav-more" @click="toggleSettings">
+          <svg-icon class="nav-icon"
+                    icon="<circle cx='12' cy='5' r='1.5' fill='currentColor'/><circle cx='12' cy='12' r='1.5' fill='currentColor'/><circle cx='12' cy='19' r='1.5' fill='currentColor'/>"/>
+        </view>
       </view>
     </view>
 
 
     <scroll-view
-      class="message-list"
-      scroll-y
-      :scroll-into-view="scrollToId"
-      :scroll-with-animation="true"
-      @scrolltoupper="onScrollToUpper"
+        class="message-list"
+        scroll-y
+        :scroll-into-view="scrollToId"
+        :scroll-with-animation="true"
+        @scrolltoupper="onScrollToUpper"
     >
-      <view class="load-more-tip" v-if="loadingMore"><text>加载中...</text></view>
+      <view class="load-more-tip" v-if="loadingMore">
+        <text>加载中...</text>
+      </view>
       <view class="message-list-inner">
         <view class="welcome-tip" v-if="messages.length === 0 && chatType === 'ai'">
           <view class="welcome-icon">
-            <svg-icon icon="<rect x='3' y='11' width='18' height='10' rx='2' stroke='currentColor' stroke-width='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4' stroke='currentColor' stroke-width='2'/><circle cx='9' cy='16' r='1' fill='currentColor'/><circle cx='15' cy='16' r='1' fill='currentColor'/>" size="40" />
+            <svg-icon
+                icon="<rect x='3' y='11' width='18' height='10' rx='2' stroke='currentColor' stroke-width='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4' stroke='currentColor' stroke-width='2'/><circle cx='9' cy='16' r='1' fill='currentColor'/><circle cx='15' cy='16' r='1' fill='currentColor'/>"
+                size="40"/>
           </view>
           <text class="welcome-text">你好！我是 Nova AI 助手，有什么可以帮你的吗？</text>
         </view>
@@ -40,17 +52,19 @@
           </view>
 
           <view
-            v-else
-            :id="`msg-${msg.id}`"
-            class="message-item"
-            :class="[msg.role, { recalled: msg.recalled }]"
-            @longpress="onMsgLongPress(msg)"
+              v-else
+              :id="`msg-${msg.id}`"
+              class="message-item"
+              :class="[msg.role, { recalled: msg.recalled }]"
+              @longpress="onMsgLongPress(msg)"
           >
             <template v-if="msg.role === 'other' || msg.role === 'assistant'">
               <view class="avatar other-avatar" v-if="chatType === 'ai'">
-                <svg-icon icon="<rect x='3' y='11' width='18' height='10' rx='2' stroke='currentColor' stroke-width='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4' stroke='currentColor' stroke-width='2'/><circle cx='9' cy='16' r='1' fill='currentColor'/><circle cx='15' cy='16' r='1' fill='currentColor'/>" size="40" />
+                <svg-icon
+                    icon="<rect x='3' y='11' width='18' height='10' rx='2' stroke='currentColor' stroke-width='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4' stroke='currentColor' stroke-width='2'/><circle cx='9' cy='16' r='1' fill='currentColor'/><circle cx='15' cy='16' r='1' fill='currentColor'/>"
+                    size="40"/>
               </view>
-              <image v-else class="avatar-img" :src="targetAvatar || ''" mode="aspectFill" />
+              <image v-else class="avatar-img" :src="targetAvatar || ''" mode="aspectFill"/>
               <view class="bubble-wrap">
                 <view class="quote-bar" v-if="getQuoteMsg(msg)">
                   <text class="quote-text">{{ getQuoteMsg(msg).content || '[图片]' }}</text>
@@ -58,7 +72,8 @@
                 <view class="bubble other-bubble" v-if="!msg.recalled">
                   <text class="bubble-text" v-if="msg.type === 'text'">{{ msg.content }}</text>
                   <view class="image-wrap" v-else-if="msg.type === 'image'">
-                    <image class="bubble-image" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg)" @longpress="onImageLongPress(msg)" />
+                    <image class="bubble-image" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg)"
+                           @longpress="onImageLongPress(msg)"/>
                     <view class="upload-overlay" v-if="msg.uploading">
                       <text class="upload-text">上传中...</text>
                     </view>
@@ -69,7 +84,9 @@
                   <text class="bubble-emoji" v-else-if="msg.type === 'emoji'">{{ msg.content }}</text>
                   <view class="typing-cursor" v-if="msg.typing"></view>
                 </view>
-                <view class="recalled-tip" v-else><text>消息已撤回</text></view>
+                <view class="recalled-tip" v-else>
+                  <text>消息已撤回</text>
+                </view>
               </view>
             </template>
 
@@ -81,7 +98,8 @@
                 <view class="bubble user-bubble" v-if="!msg.recalled">
                   <text class="bubble-text" v-if="msg.type === 'text'">{{ msg.content }}</text>
                   <view class="image-wrap" v-else-if="msg.type === 'image'">
-                    <image class="bubble-image" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg)" @longpress="onImageLongPress(msg)" />
+                    <image class="bubble-image" :src="msg.imageUrl" mode="widthFix" @click="previewImage(msg)"
+                           @longpress="onImageLongPress(msg)"/>
                     <view class="upload-overlay" v-if="msg.uploading">
                       <text class="upload-text">上传中...</text>
                     </view>
@@ -91,18 +109,25 @@
                   </view>
                   <text class="bubble-emoji" v-else-if="msg.type === 'emoji'">{{ msg.content }}</text>
                 </view>
-                <view class="recalled-tip" v-else><text>你撤回了一条消息</text></view>
+                <view class="recalled-tip" v-else>
+                  <text>你撤回了一条消息</text>
+                </view>
                 <view class="status-row" v-if="!msg.recalled">
-                  <view class="status-sending" v-if="msg.status === 'sending'"><view class="spinner"></view></view>
+                  <view class="status-sending" v-if="msg.status === 'sending'">
+                    <view class="spinner"></view>
+                  </view>
                   <view class="status-failed" v-else-if="msg.status === 'failed'" @click.stop="retrySend(msg)">
-                    <svg-icon icon="<circle cx='12' cy='12' r='10' stroke='#ff3b30' stroke-width='2'/><path d='M12 8V12L15 15' stroke='#ff3b30' stroke-width='2' stroke-linecap='round'/>" size="16" color="#ff3b30" />
+                    <svg-icon
+                        icon="<circle cx='12' cy='12' r='10' stroke='#ff3b30' stroke-width='2'/><path d='M12 8V12L15 15' stroke='#ff3b30' stroke-width='2' stroke-linecap='round'/>"
+                        size="16" color="#ff3b30"/>
                     <text class="failed-text">重发</text>
                   </view>
                 </view>
               </view>
-              <image v-if="myAvatar" class="avatar-img" :src="myAvatar" mode="aspectFill" />
+              <image v-if="myAvatar" class="avatar-img" :src="myAvatar" mode="aspectFill"/>
               <view v-else class="avatar user-avatar">
-                <svg-icon icon="<path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><circle cx='12' cy='7' r='4' stroke='currentColor' stroke-width='2'/>" />
+                <svg-icon
+                    icon="<path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><circle cx='12' cy='7' r='4' stroke='currentColor' stroke-width='2'/>"/>
               </view>
             </template>
           </view>
@@ -117,7 +142,9 @@
         <text class="quote-label">回复：</text>
         <text class="quote-preview">{{ quoteMsg.content || '[图片]' }}</text>
         <view class="quote-close" @click="quoteMsg = null">
-          <svg-icon icon="<path d='M18 6L6 18M6 6l12 12' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>" size="28" />
+          <svg-icon
+              icon="<path d='M18 6L6 18M6 6l12 12' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>"
+              size="28"/>
         </view>
       </view>
     </view>
@@ -125,16 +152,24 @@
     <view class="input-area">
       <view class="input-toolbar">
         <view class="tool-btn" @click="toggleEmojiPanel">
-          <svg-icon icon="<circle cx='12' cy='12' r='10' stroke='currentColor' stroke-width='2'/><path d='M8 14s1.5 2 4 2 4-2 4-2' stroke='currentColor' stroke-width='2' stroke-linecap='round'/><circle cx='9' cy='9' r='1' fill='currentColor'/><circle cx='15' cy='9' r='1' fill='currentColor'/>" />
+          <svg-icon
+              icon="<circle cx='12' cy='12' r='10' stroke='currentColor' stroke-width='2'/><path d='M8 14s1.5 2 4 2 4-2 4-2' stroke='currentColor' stroke-width='2' stroke-linecap='round'/><circle cx='9' cy='9' r='1' fill='currentColor'/><circle cx='15' cy='9' r='1' fill='currentColor'/>"/>
+        </view>
+        <view class="tool-btn" @click="onPolish">
+          <svg-icon
+              icon="<path d='M9.5 3.5L12 6L14.5 3.5' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M5 13L9.5 7.5L12 10L14.5 7.5L19 13' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><circle cx='12' cy='18' r='3' stroke='currentColor' stroke-width='2'/>"/>
         </view>
         <view class="tool-btn" @click="pickImage">
-          <svg-icon icon="<rect x='3' y='3' width='18' height='18' rx='2' stroke='currentColor' stroke-width='2'/><circle cx='8.5' cy='8.5' r='1.5' stroke='currentColor' stroke-width='2'/><path d='M21 15l-5-5L5 21' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
+          <svg-icon
+              icon="<rect x='3' y='3' width='18' height='18' rx='2' stroke='currentColor' stroke-width='2'/><circle cx='8.5' cy='8.5' r='1.5' stroke='currentColor' stroke-width='2'/><path d='M21 15l-5-5L5 21' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>"/>
         </view>
       </view>
       <view class="input-row">
-        <input class="msg-input" v-model="inputText" placeholder="输入消息..." placeholder-class="input-placeholder" :disabled="isStreaming" confirm-type="send" @confirm="sendTextMsg" @focus="onInputFocus" />
+        <input class="msg-input" v-model="inputText" placeholder="输入消息..." placeholder-class="input-placeholder"
+               :disabled="isStreaming" confirm-type="send" @confirm="sendTextMsg" @focus="onInputFocus"/>
         <view class="send-btn" :class="{ active: canSend }" @click="sendTextMsg">
-          <svg-icon class="send-icon" icon="<path d='M22 2L11 13' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M22 2L15 22L11 13L2 9L22 2Z' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>" />
+          <svg-icon class="send-icon"
+                    icon="<path d='M22 2L11 13' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M22 2L15 22L11 13L2 9L22 2Z' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>"/>
         </view>
       </view>
     </view>
@@ -149,39 +184,104 @@
       </scroll-view>
     </view>
 
+    <view class="polish-panel" v-if="showPolishPanel">
+      <view class="polish-header">
+        <text class="polish-title">AI 润色</text>
+        <view class="polish-close" @click="showPolishPanel = false">
+          <svg-icon
+              icon="<path d='M18 6L6 18M6 6l12 12' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>"
+              size="28"/>
+        </view>
+      </view>
+      <view class="polish-content">
+        <view class="polish-loading" v-if="polishLoading">
+          <text>润色中...</text>
+        </view>
+        <view class="polish-results" v-else>
+          <view class="polish-item" v-for="(item, index) in polishResults" :key="index"
+                @click="selectPolishResult(item)">
+            <text class="polish-label">{{ ['温柔', '幽默', '高情商', '正式'][index] || '' }}</text>
+            <text class="polish-text">{{ item }}</text>
+          </view>
+          <view class="polish-empty" v-if="polishResults.length === 0">
+            <text>暂无润色结果</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <view class="context-mask" v-if="contextMenu.visible" @click="closeContextMenu">
       <view class="context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }" @click.stop>
-        <view class="ctx-item" @click="doCopy" v-if="contextMenu.msg?.type === 'text'"><text>复制</text></view>
-        <view class="ctx-item" @click="doQuote" v-if="contextMenu.msg?.type !== 'system'"><text>引用</text></view>
-        <view class="ctx-item" @click="doForward" v-if="contextMenu.msg?.type !== 'system'"><text>转发</text></view>
-        <view class="ctx-item" @click="doRecall" v-if="contextMenu.msg && canRecall(contextMenu.msg)"><text>撤回</text></view>
-        <view class="ctx-item ctx-danger" @click="doDelete" v-if="contextMenu.msg?.type !== 'system'"><text>删除</text></view>
+        <view class="ctx-item" @click="doCopy" v-if="contextMenu.msg?.type === 'text'">
+          <text>复制</text>
+        </view>
+        <view class="ctx-item" @click="doQuote" v-if="contextMenu.msg?.type !== 'system'">
+          <text>引用</text>
+        </view>
+        <view class="ctx-item" @click="doForward" v-if="contextMenu.msg?.type !== 'system'">
+          <text>转发</text>
+        </view>
+        <view class="ctx-item" @click="doRecall" v-if="contextMenu.msg && canRecall(contextMenu.msg)">
+          <text>撤回</text>
+        </view>
+        <view class="ctx-item ctx-danger" @click="doDelete" v-if="contextMenu.msg?.type !== 'system'">
+          <text>删除</text>
+        </view>
       </view>
     </view>
 
     <view class="settings-mask" v-if="showSettings" @click="showSettings = false">
       <view class="settings-panel" @click.stop>
         <view class="settings-title">聊天设置</view>
-        <view class="settings-item" @click="changeBg('')"><text>默认背景</text><view class="radio-dot" :class="{ active: !chatBg }"></view></view>
-        <view class="settings-item" @click="changeBg('#e8f5e9')"><text>浅绿</text><view class="radio-dot" :class="{ active: chatBg === '#e8f5e9' }"></view></view>
-        <view class="settings-item" @click="changeBg('#e3f2fd')"><text>浅蓝</text><view class="radio-dot" :class="{ active: chatBg === '#e3f2fd' }"></view></view>
-        <view class="settings-item" @click="changeBg('#fff3e0')"><text>浅橙</text><view class="radio-dot" :class="{ active: chatBg === '#fff3e0' }"></view></view>
-        <view class="settings-item" @click="changeBg('#f3e5f5')"><text>浅紫</text><view class="radio-dot" :class="{ active: chatBg === '#f3e5f5' }"></view></view>
+        <view class="settings-item" @click="changeBg('')">
+          <text>默认背景</text>
+          <view class="radio-dot" :class="{ active: !chatBg }"></view>
+        </view>
+        <view class="settings-item" @click="changeBg('#e8f5e9')">
+          <text>浅绿</text>
+          <view class="radio-dot" :class="{ active: chatBg === '#e8f5e9' }"></view>
+        </view>
+        <view class="settings-item" @click="changeBg('#e3f2fd')">
+          <text>浅蓝</text>
+          <view class="radio-dot" :class="{ active: chatBg === '#e3f2fd' }"></view>
+        </view>
+        <view class="settings-item" @click="changeBg('#fff3e0')">
+          <text>浅橙</text>
+          <view class="radio-dot" :class="{ active: chatBg === '#fff3e0' }"></view>
+        </view>
+        <view class="settings-item" @click="changeBg('#f3e5f5')">
+          <text>浅紫</text>
+          <view class="radio-dot" :class="{ active: chatBg === '#f3e5f5' }"></view>
+        </view>
         <view class="settings-divider"></view>
-        <view class="settings-item ctx-danger" @click="doClearHistory"><text>清空聊天记录</text></view>
+        <view class="settings-item ctx-danger" @click="doClearHistory">
+          <text>清空聊天记录</text>
+        </view>
       </view>
     </view>
+
+    <incoming-call
+        v-if="incomingCall.visible"
+        :callId="incomingCall.callId"
+        :callerId="incomingCall.callerId"
+        :callerName="incomingCall.callerName"
+        :callerAvatar="incomingCall.callerAvatar"
+        @accept="onIncomingAccept"
+        @reject="onIncomingReject"
+        @close="incomingCall.visible = false"
+    />
   </view>
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted } from "vue";
-import { onLoad } from "@dcloudio/uni-app";
-import { chatCompletionStream } from "@/api/chat";
-import { sendMessage, getMessages, recallMessage, deleteMessage, markRead, getConversationId } from "@/api/im";
-import { uploadImage } from "@/api/user";
-import { connectWS, sendWSMessage, onWSMessage } from "@/utils/websocket";
-import { getStatusBarHeight } from "@/utils/safe-area";
+import {ref, computed, nextTick, onMounted, onUnmounted} from "vue";
+import {onLoad} from "@dcloudio/uni-app";
+import {chatCompletionStream, polishMessage} from "@/api/chat";
+import {sendMessage, getMessages, recallMessage, deleteMessage, markRead, getConversationId} from "@/api/im";
+import {uploadImage} from "@/api/user";
+import {connectWS, sendWSMessage, onWSMessage} from "@/utils/websocket";
+import {getStatusBarHeight} from "@/utils/safe-area";
+import IncomingCall from "@/components/incoming-call/incoming-call.vue";
 import {
   MSG_TYPE, MSG_STATUS,
   createTextMsg, createImageMsg, createSystemMsg,
@@ -207,27 +307,32 @@ const showSettings = ref(false);
 const chatBg = ref("");
 const quoteMsg = ref(null);
 const loadingMore = ref(false);
+const showPolishPanel = ref(false);
+const polishLoading = ref(false);
+const polishResults = ref([]);
+const incomingCall = ref({visible: false, callId: null, callerId: null, callerName: "", callerAvatar: ""});
 let abortFn = null;
 let removeWSHandler = null;
+let isNavigatingToCall = false;
 
-const contextMenu = ref({ visible: false, msg: null, x: 0, y: 0 });
+const contextMenu = ref({visible: false, msg: null, x: 0, y: 0});
 
 const emojiList = [
-  "😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊",
-  "😋","😎","😍","🥰","😘","😗","😙","😚","🙂","🤗",
-  "🤔","😐","😑","😶","🙄","😏","😣","😥","😮","🤐",
-  "😯","😪","😫","😴","😌","😛","😜","😝","🤤","😒",
-  "😓","😔","😕","🙃","🤑","😲","🙁","😖","😞","😟",
-  "😤","😢","😭","😦","😧","😨","😩","🤯","😬","😰",
-  "😱","🥵","🥶","😳","🤪","😵","😡","😠","🤬","😷",
-  "🤒","🤕","🤢","🤮","🥴","😇","🥳","🥺","🤠","🤡",
-  "👍","👎","👌","✌️","🤞","🤟","🤘","🤙","👋","🤚",
-  "✋","🖖","👏","🙌","🤝","🙏","💪","❤️","🔥","⭐",
-  "🎉","🎊","💯","✅","❌","⚡","🌈","☀️","🌙","🎵",
+  "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
+  "😋", "😎", "😍", "🥰", "😘", "😗", "😙", "😚", "🙂", "🤗",
+  "🤔", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", "😮", "🤐",
+  "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝", "🤤", "😒",
+  "😓", "😔", "😕", "🙃", "🤑", "😲", "🙁", "😖", "😞", "😟",
+  "😤", "😢", "😭", "😦", "😧", "😨", "😩", "🤯", "😬", "😰",
+  "😱", "🥵", "🥶", "😳", "🤪", "😵", "😡", "😠", "🤬", "😷",
+  "🤒", "🤕", "🤢", "🤮", "🥴", "😇", "🥳", "🥺", "🤠", "🤡",
+  "👍", "👎", "👌", "✌️", "🤞", "🤟", "🤘", "🤙", "👋", "🤚",
+  "✋", "🖖", "👏", "🙌", "🤝", "🙏", "💪", "❤️", "🔥", "⭐",
+  "🎉", "🎊", "💯", "✅", "❌", "⚡", "🌈", "☀️", "🌙", "🎵",
 ];
 
 const canSend = computed(() => inputText.value.trim() && !isStreaming.value);
-const pageBgStyle = computed(() => chatBg.value ? { backgroundColor: chatBg.value } : {});
+const pageBgStyle = computed(() => chatBg.value ? {backgroundColor: chatBg.value} : {});
 
 let loadCount = 0;
 
@@ -255,7 +360,8 @@ onLoad((options) => {
   if (chatType.value === "single") {
     loadServerMessages();
     if (conversationId.value) {
-      markRead(conversationId.value).catch(() => {});
+      markRead(conversationId.value).catch(() => {
+      });
     }
   } else {
     const history = loadChatHistory(chatId.value);
@@ -292,7 +398,7 @@ async function loadServerMessages() {
     }
     if (!conversationId.value) return;
 
-    const res = await getMessages({ conversationId: conversationId.value, size: 50 });
+    const res = await getMessages({conversationId: conversationId.value, size: 50});
     const serverMsgs = res.data || [];
     console.log("[Chat] server messages count:", serverMsgs.length);
     const me = uni.getStorageSync("userInfo");
@@ -311,12 +417,17 @@ async function loadServerMessages() {
 function scrollToBottom() {
   nextTick(() => {
     scrollToId.value = "";
-    setTimeout(() => { scrollToId.value = "msg-bottom"; }, 50);
+    setTimeout(() => {
+      scrollToId.value = "msg-bottom";
+    }, 50);
   });
 }
 
 function goBack() {
-  if (abortFn) { abortFn(); abortFn = null; }
+  if (abortFn) {
+    abortFn();
+    abortFn = null;
+  }
   if (chatType.value === "ai") {
     saveChatHistory(chatId.value, messages.value);
   }
@@ -324,14 +435,54 @@ function goBack() {
   if (pages.length > 1) {
     uni.navigateBack();
   } else {
-    uni.reLaunch({ url: "/pages/home/index" });
+    uni.reLaunch({url: "/pages/home/index"});
   }
 }
 
-function toggleSettings() { showSettings.value = !showSettings.value; showEmojiPanel.value = false; }
-function toggleEmojiPanel() { showEmojiPanel.value = !showEmojiPanel.value; }
-function onInputFocus() { showEmojiPanel.value = false; }
-function insertEmoji(emoji) { inputText.value += emoji; }
+function toggleSettings() {
+  showSettings.value = !showSettings.value;
+  showEmojiPanel.value = false;
+}
+
+function toggleEmojiPanel() {
+  showEmojiPanel.value = !showEmojiPanel.value;
+}
+
+function onInputFocus() {
+  showEmojiPanel.value = false;
+  showPolishPanel.value = false;
+}
+
+function insertEmoji(emoji) {
+  inputText.value += emoji;
+}
+
+async function onPolish() {
+  const text = inputText.value.trim();
+  if (!text || polishLoading.value) return;
+
+  showPolishPanel.value = true;
+  showEmojiPanel.value = false;
+  polishLoading.value = true;
+  polishResults.value = [];
+
+  try {
+    const res = await polishMessage(text);
+    polishResults.value = res.results || [];
+  } catch (e) {
+    console.error("polish error:", e);
+    uni.showToast({title: "润色失败", icon: "none"});
+    polishResults.value = [];
+  } finally {
+    polishLoading.value = false;
+  }
+}
+
+function selectPolishResult(text) {
+  inputText.value = text;
+  showPolishPanel.value = false;
+  polishResults.value = [];
+}
 
 let isSending = false;
 
@@ -340,7 +491,7 @@ async function sendTextMsg() {
   if (!text || isStreaming.value || isSending) return;
 
   isSending = true;
-  const msg = createTextMsg("user", text, { quoteId: quoteMsg.value?.id || null });
+  const msg = createTextMsg("user", text, {quoteId: quoteMsg.value?.id || null});
   quoteMsg.value = null;
   messages.value.push(msg);
   inputText.value = "";
@@ -366,7 +517,7 @@ function pickImage() {
     sourceType: ["album", "camera"],
     success: (res) => {
       const tempUrl = res.tempFilePaths[0];
-      const msg = createImageMsg("user", tempUrl, { quoteId: quoteMsg.value?.id || null });
+      const msg = createImageMsg("user", tempUrl, {quoteId: quoteMsg.value?.id || null});
       msg.status = MSG_STATUS.SENDING;
       msg.uploading = true;
       quoteMsg.value = null;
@@ -374,29 +525,30 @@ function pickImage() {
       scrollToBottom();
 
       uploadImage(tempUrl)
-        .then((result) => {
-          const thumbUrl = result.data?.thumbUrl || result.thumbUrl || result.data?.url || result.url;
-          const originUrl = result.data?.url || result.url;
-          msg.thumbUrl = thumbUrl;
-          msg.imageUrl = thumbUrl;
-          msg.originUrl = originUrl;
-          msg.uploading = false;
-          msg.status = MSG_STATUS.SENT;
+          .then((result) => {
+            const thumbUrl = result.data?.thumbUrl || result.thumbUrl || result.data?.url || result.url;
+            const originUrl = result.data?.url || result.url;
+            msg.thumbUrl = thumbUrl;
+            msg.imageUrl = thumbUrl;
+            msg.originUrl = originUrl;
+            msg.uploading = false;
+            msg.status = MSG_STATUS.SENT;
 
-          if (chatType.value === "ai") {
-            requestAIReply(msg);
-          } else {
-            sendSingleChatMsg(msg);
-          }
-        })
-        .catch((err) => {
-          console.error('图片上传失败', err);
-          msg.uploading = false;
-          msg.status = MSG_STATUS.FAILED;
-          uni.showToast({ title: "图片上传失败", icon: "none" });
-        });
+            if (chatType.value === "ai") {
+              requestAIReply(msg);
+            } else {
+              sendSingleChatMsg(msg);
+            }
+          })
+          .catch((err) => {
+            console.error('图片上传失败', err);
+            msg.uploading = false;
+            msg.status = MSG_STATUS.FAILED;
+            uni.showToast({title: "图片上传失败", icon: "none"});
+          });
     },
-    fail: () => {},
+    fail: () => {
+    },
   });
 }
 
@@ -405,7 +557,7 @@ async function sendSingleChatMsg(localMsg) {
     if (!targetUserId.value) {
       console.error("targetUserId is empty");
       localMsg.status = MSG_STATUS.FAILED;
-      uni.showToast({ title: "发送失败：未找到接收人", icon: "none" });
+      uni.showToast({title: "发送失败：未找到接收人", icon: "none"});
       return;
     }
 
@@ -421,7 +573,7 @@ async function sendSingleChatMsg(localMsg) {
     });
 
     // 使用 Object.assign 触发响应式更新
-    Object.assign(localMsg, { status: MSG_STATUS.SENT });
+    Object.assign(localMsg, {status: MSG_STATUS.SENT});
     console.log("Message status updated to:", localMsg.status);
 
     // 强制刷新视图
@@ -431,43 +583,46 @@ async function sendSingleChatMsg(localMsg) {
   } catch (e) {
     console.error("sendSingleChatMsg failed:", e);
     localMsg.status = MSG_STATUS.FAILED;
-    uni.showToast({ title: "发送失败", icon: "none" });
+    uni.showToast({title: "发送失败", icon: "none"});
   }
 }
 
 function requestAIReply(userMsg) {
-  const assistantMsg = createTextMsg("assistant", "", { typing: true });
+  const assistantMsg = createTextMsg("assistant", "", {typing: true});
   messages.value.push(assistantMsg);
   isStreaming.value = true;
   scrollToBottom();
 
   const history = messages.value
-    .filter((m) => m.role === "user" || (m.role === "assistant" && m.content && !m.typing))
-    .map((m) => ({ role: m.role, content: m.type === "image" ? "[图片]" : m.content }));
+      .filter((m) => m.role === "user" || (m.role === "assistant" && m.content && !m.typing))
+      .map((m) => ({role: m.role, content: m.type === "image" ? "[图片]" : m.content}));
 
   abortFn = chatCompletionStream(
-    { messages: history },
-    {
-      onChunk: (chunk) => { assistantMsg.content += chunk; scrollToBottom(); },
-      onDone: () => {
-        assistantMsg.typing = false;
-        assistantMsg.status = MSG_STATUS.SENT;
-        isStreaming.value = false;
-        abortFn = null;
-        scrollToBottom();
-        saveChatHistory(chatId.value, messages.value);
-      },
-      onError: (err) => {
-        console.error("Stream error:", err);
-        assistantMsg.content = assistantMsg.content || "抱歉，发生了错误，请稍后重试。";
-        assistantMsg.typing = false;
-        assistantMsg.status = MSG_STATUS.SENT;
-        isStreaming.value = false;
-        abortFn = null;
-        userMsg.status = MSG_STATUS.FAILED;
-        uni.showToast({ title: "请求失败", icon: "none" });
-      },
-    }
+      {messages: history},
+      {
+        onChunk: (chunk) => {
+          assistantMsg.content += chunk;
+          scrollToBottom();
+        },
+        onDone: () => {
+          assistantMsg.typing = false;
+          assistantMsg.status = MSG_STATUS.SENT;
+          isStreaming.value = false;
+          abortFn = null;
+          scrollToBottom();
+          saveChatHistory(chatId.value, messages.value);
+        },
+        onError: (err) => {
+          console.error("Stream error:", err);
+          assistantMsg.content = assistantMsg.content || "抱歉，发生了错误，请稍后重试。";
+          assistantMsg.typing = false;
+          assistantMsg.status = MSG_STATUS.SENT;
+          isStreaming.value = false;
+          abortFn = null;
+          userMsg.status = MSG_STATUS.FAILED;
+          uni.showToast({title: "请求失败", icon: "none"});
+        },
+      }
   );
 }
 
@@ -482,7 +637,7 @@ function retrySend(msg) {
 
 function onMsgLongPress(msg) {
   if (msg.type === MSG_TYPE.SYSTEM) return;
-  contextMenu.value = { visible: true, msg, x: 60, y: 200 };
+  contextMenu.value = {visible: true, msg, x: 60, y: 200};
 }
 
 function onImageLongPress(msg) {
@@ -494,19 +649,25 @@ function onImageLongPress(msg) {
       } else if (res.tapIndex === 1) {
         uni.setClipboardData({
           data: msg.originUrl || msg.imageUrl,
-          success: () => uni.showToast({ title: '已复制', icon: 'success' })
+          success: () => uni.showToast({title: '已复制', icon: 'success'})
         });
       }
     }
   });
 }
 
-function closeContextMenu() { contextMenu.value.visible = false; }
+function closeContextMenu() {
+  contextMenu.value.visible = false;
+}
 
 function doCopy() {
   const msg = contextMenu.value.msg;
   if (!msg) return;
-  uni.setClipboardData({ data: msg.content, success: () => { uni.showToast({ title: "已复制", icon: "success" }); } });
+  uni.setClipboardData({
+    data: msg.content, success: () => {
+      uni.showToast({title: "已复制", icon: "success"});
+    }
+  });
   closeContextMenu();
 }
 
@@ -520,7 +681,11 @@ function doQuote() {
 function doForward() {
   const msg = contextMenu.value.msg;
   if (!msg) return;
-  uni.setClipboardData({ data: msg.type === "image" ? "[图片]" : msg.content, success: () => { uni.showToast({ title: "已复制，可粘贴转发", icon: "none" }); } });
+  uni.setClipboardData({
+    data: msg.type === "image" ? "[图片]" : msg.content, success: () => {
+      uni.showToast({title: "已复制，可粘贴转发", icon: "none"});
+    }
+  });
   closeContextMenu();
 }
 
@@ -537,7 +702,7 @@ async function doRecall() {
   }
   msg.recalled = true;
   closeContextMenu();
-  uni.showToast({ title: "已撤回", icon: "success" });
+  uni.showToast({title: "已撤回", icon: "success"});
 }
 
 async function doDelete() {
@@ -563,13 +728,13 @@ function getQuoteMsg(msg) {
 
 function previewImage(msg) {
   const urls = msg.originUrl ? [msg.originUrl] : [msg.imageUrl];
-  uni.previewImage({ urls: urls, current: urls[0] });
+  uni.previewImage({urls: urls, current: urls[0]});
 }
 
 function downloadImage(msg) {
   const url = msg.originUrl || msg.imageUrl;
   if (!url) return;
-  uni.showLoading({ title: '下载中...' });
+  uni.showLoading({title: '下载中...'});
   uni.download({
     url: url,
     success: (res) => {
@@ -578,18 +743,18 @@ function downloadImage(msg) {
           filePath: res.tempFilePath,
           success: () => {
             uni.hideLoading();
-            uni.showToast({ title: '保存成功', icon: 'success' });
+            uni.showToast({title: '保存成功', icon: 'success'});
           },
           fail: () => {
             uni.hideLoading();
-            uni.showToast({ title: '保存失败', icon: 'none' });
+            uni.showToast({title: '保存失败', icon: 'none'});
           }
         });
       }
     },
     fail: () => {
       uni.hideLoading();
-      uni.showToast({ title: '下载失败', icon: 'none' });
+      uni.showToast({title: '下载失败', icon: 'none'});
     }
   });
 }
@@ -607,7 +772,7 @@ async function loadMoreMessages() {
 
   loadingMore.value = true;
   try {
-    const res = await getMessages({ conversationId: conversationId.value, lastMsgId: firstMsg.serverId, size: 30 });
+    const res = await getMessages({conversationId: conversationId.value, lastMsgId: firstMsg.serverId, size: 30});
     const serverMsgs = res.data || [];
     const me = uni.getStorageSync("userInfo");
     const myId = me?.id || me?.userId;
@@ -624,7 +789,10 @@ async function loadMoreMessages() {
   }
 }
 
-function changeBg(bg) { chatBg.value = bg; saveChatBg(chatId.value, bg); }
+function changeBg(bg) {
+  chatBg.value = bg;
+  saveChatBg(chatId.value, bg);
+}
 
 function doClearHistory() {
   uni.showModal({
@@ -635,7 +803,7 @@ function doClearHistory() {
         messages.value = [];
         if (chatType.value === "ai") clearChatHistory(chatId.value);
         showSettings.value = false;
-        uni.showToast({ title: "已清空", icon: "success" });
+        uni.showToast({title: "已清空", icon: "success"});
       }
     },
   });
@@ -649,7 +817,6 @@ onMounted(() => {
     removeWSHandler = onWSMessage((data) => {
       console.log("[Chat] WS message received:", data.type, data.data?.id);
       if (data.type === "chat_sent" && data.data) {
-        // 更新本地消息的 serverId
         const msgData = data.data;
         const localMsg = messages.value.find(m => m.content === msgData.content && m.status === MSG_STATUS.SENT);
         if (localMsg) {
@@ -658,7 +825,6 @@ onMounted(() => {
       } else if (data.type === "chat_received" && data.data) {
         const msgData = data.data;
         if (msgData.conversationId === conversationId.value) {
-          // 如果是自己发送的消息，不重复添加
           const me = uni.getStorageSync("userInfo");
           const myId = me?.id || me?.userId;
           if (msgData.senderId === myId) {
@@ -669,8 +835,31 @@ onMounted(() => {
           const msg = serverMsgToLocal(msgData, "other");
           messages.value.push(msg);
           scrollToBottom();
-          markRead(conversationId.value).catch(() => {});
+          markRead(conversationId.value).catch(() => {
+          });
         }
+      } else if (data.type === "call_incoming" && data.data) {
+        const callData = data.data;
+        incomingCall.value = {
+          visible: true,
+          callId: callData.callId,
+          callerId: callData.callerId,
+          callerName: chatName.value,
+          callerAvatar: targetAvatar.value,
+        };
+      } else if (data.type === "call_rejected" && data.data) {
+        incomingCall.value.visible = false;
+      } else if (data.type === "call_ringing" && data.data) {
+        if (isNavigatingToCall) return;
+        isNavigatingToCall = true;
+        navigateToCallPage(data.data.callId, "caller");
+      } else if (data.type === "call_accepted" && data.data) {
+        if (isNavigatingToCall) return;
+        isNavigatingToCall = true;
+        navigateToCallPage(data.data.callId, "caller");
+      } else if (data.type === "call_busy" && data.data) {
+        isNavigatingToCall = false;
+        uni.showToast({title: "对方不在线", icon: "none"});
       }
     });
   }
@@ -683,44 +872,303 @@ onUnmounted(() => {
     removeWSHandler = null;
   }
 });
+
+function navigateToCallPage(callId, role, peerInfo) {
+  if (!callId) {
+    uni.showToast({title: "通话ID无效", icon: "none"});
+    isNavigatingToCall = false;
+    return;
+  }
+  incomingCall.value.visible = false;
+  const pid = peerInfo?.peerId ?? targetUserId.value;
+  const pname = peerInfo?.peerName ?? chatName.value;
+  const pavatar = peerInfo?.peerAvatar ?? targetAvatar.value;
+  const url = `/pages/call/index?callId=${callId}&role=${role}&peerId=${pid}&peerName=${encodeURIComponent(pname)}&peerAvatar=${encodeURIComponent(pavatar || "")}`;
+  uni.reLaunch({url}).catch(() => {
+    isNavigatingToCall = false;
+  });
+}
+
+function startVoiceCall() {
+  if (!targetUserId.value) return;
+  sendWSMessage({
+    type: "call",
+    to: targetUserId.value,
+  });
+}
+
+function onIncomingAccept(data) {
+  if (isNavigatingToCall) return;
+  isNavigatingToCall = true;
+  incomingCall.value.visible = false;
+  sendWSMessage({
+    type: "accept",
+    to: data.callerId,
+    callId: data.callId,
+  });
+  navigateToCallPage(data.callId, "callee", {
+    peerId: data.callerId,
+    peerName: data.callerName,
+    peerAvatar: data.callerAvatar,
+  });
+}
+
+function onIncomingReject(data) {
+  incomingCall.value.visible = false;
+}
 </script>
 
 <style lang="scss" scoped>
-page { background-color: #f5f5f5; }
-.status-bar { background-color: #ffffff; }
-.chat-page { height: 100vh; display: flex; flex-direction: column; background-color: #f5f5f5; position: relative; }
-.nav-bar { flex-shrink: 0; height: 88rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx; background-color: #ffffff; border-bottom: 1rpx solid #e5e5e5; z-index: 10; box-sizing: border-box; }
-.nav-back, .nav-more { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; }
-.nav-icon { width: 40rpx; height: 40rpx; color: #1a1a1a; }
-.nav-center { display: flex; flex-direction: column; align-items: center; }
-.nav-title { font-size: 32rpx; font-weight: 600; color: #1a1a1a; }
-.message-list { flex: 1; overflow-y: auto; }
-.message-list-inner { padding: 20rpx 24rpx; min-height: 100%; }
-.scroll-bottom { height: 20rpx; }
-.load-more-tip { text-align: center; padding: 16rpx; font-size: 24rpx; color: #999; }
-.welcome-tip { display: flex; flex-direction: column; align-items: center; padding: 80rpx 40rpx; }
-.welcome-icon { width: 120rpx; height: 120rpx; background-color: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24rpx; svg { width: 64rpx; height: 64rpx; color: #07c160; } }
-.welcome-text { font-size: 28rpx; color: #666; text-align: center; line-height: 1.6; }
-.time-tip { text-align: center; margin: 24rpx 0 16rpx; }
-.time-text { font-size: 22rpx; color: #999; background: rgba(0,0,0,0.04); padding: 4rpx 16rpx; border-radius: 8rpx; }
-.system-msg { text-align: center; margin: 16rpx 0; }
-.system-text { font-size: 24rpx; color: #999; }
-.message-item { display: flex; align-items: flex-start; margin-bottom: 32rpx; &.user { justify-content: flex-end; } &.recalled { opacity: 0.6; } }
-.avatar { width: 72rpx; height: 72rpx; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; svg { width: 40rpx; height: 40rpx; } }
-.avatar-img { width: 72rpx; height: 72rpx; border-radius: 12rpx; flex-shrink: 0; background-color: #f0f0f0; }
-.other-avatar { background-color: #e8f5e9; margin-right: 16rpx; svg { color: #07c160; } }
-.user-avatar { background-color: #e3f2fd; margin-left: 16rpx; svg { color: #10aeff; } }
-.message-item.user .avatar-img { margin-left: 16rpx; }
-.message-item.other .avatar-img { margin-right: 16rpx; }
-.bubble-wrap { max-width: 70%; min-width: 60rpx; }
-.quote-bar { background: rgba(0,0,0,0.05); border-left: 4rpx solid #07c160; padding: 8rpx 16rpx; border-radius: 8rpx 8rpx 0 0; margin-bottom: -8rpx; }
-.quote-text { font-size: 24rpx; color: #666; }
-.bubble { padding: 20rpx 24rpx; border-radius: 16rpx; word-break: break-all; position: relative; }
-.other-bubble { background-color: #ffffff; border-top-left-radius: 4rpx; }
-.user-bubble { background-color: #95ec69; border-top-right-radius: 4rpx; }
-.bubble-text { font-size: 30rpx; line-height: 1.6; color: #1a1a1a; }
-.bubble-image { max-width: 400rpx; border-radius: 8rpx; }
-.image-wrap { position: relative; display: inline-block; }
+page {
+  background-color: #f5f5f5;
+}
+
+.status-bar {
+  background-color: #ffffff;
+}
+
+.chat-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  position: relative;
+}
+
+.nav-bar {
+  flex-shrink: 0;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e5e5e5;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.nav-back, .nav-more {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.nav-icon {
+  width: 40rpx;
+  height: 40rpx;
+  color: #1a1a1a;
+}
+
+.nav-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.message-list-inner {
+  padding: 20rpx 24rpx;
+  min-height: 100%;
+}
+
+.scroll-bottom {
+  height: 20rpx;
+}
+
+.load-more-tip {
+  text-align: center;
+  padding: 16rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.welcome-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 40rpx;
+}
+
+.welcome-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background-color: #e8f5e9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+
+  svg {
+    width: 64rpx;
+    height: 64rpx;
+    color: #07c160;
+  }
+}
+
+.welcome-text {
+  font-size: 28rpx;
+  color: #666;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.time-tip {
+  text-align: center;
+  margin: 24rpx 0 16rpx;
+}
+
+.time-text {
+  font-size: 22rpx;
+  color: #999;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.system-msg {
+  text-align: center;
+  margin: 16rpx 0;
+}
+
+.system-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 32rpx;
+
+  &.user {
+    justify-content: flex-end;
+  }
+
+  &.recalled {
+    opacity: 0.6;
+  }
+}
+
+.avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 40rpx;
+    height: 40rpx;
+  }
+}
+
+.avatar-img {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  background-color: #f0f0f0;
+}
+
+.other-avatar {
+  background-color: #e8f5e9;
+  margin-right: 16rpx;
+
+  svg {
+    color: #07c160;
+  }
+}
+
+.user-avatar {
+  background-color: #e3f2fd;
+  margin-left: 16rpx;
+
+  svg {
+    color: #10aeff;
+  }
+}
+
+.message-item.user .avatar-img {
+  margin-left: 16rpx;
+}
+
+.message-item.other .avatar-img {
+  margin-right: 16rpx;
+}
+
+.bubble-wrap {
+  max-width: 70%;
+  min-width: 60rpx;
+}
+
+.quote-bar {
+  background: rgba(0, 0, 0, 0.05);
+  border-left: 4rpx solid #07c160;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  margin-bottom: -8rpx;
+}
+
+.quote-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.bubble {
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
+  word-break: break-all;
+  position: relative;
+}
+
+.other-bubble {
+  background-color: #ffffff;
+  border-top-left-radius: 4rpx;
+}
+
+.user-bubble {
+  background-color: #95ec69;
+  border-top-right-radius: 4rpx;
+}
+
+.bubble-text {
+  font-size: 30rpx;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+.bubble-image {
+  max-width: 400rpx;
+  border-radius: 8rpx;
+}
+
+.image-wrap {
+  position: relative;
+  display: inline-block;
+}
+
 .upload-overlay, .failed-overlay {
   position: absolute;
   top: 0;
@@ -733,42 +1181,401 @@ page { background-color: #f5f5f5; }
   justify-content: center;
   border-radius: 8rpx;
 }
-.upload-text, .failed-text { color: #fff; font-size: 24rpx; }
-.failed-text { color: #ff3b30; }
-.bubble-emoji { font-size: 64rpx; }
-.typing-cursor { display: inline-block; width: 4rpx; height: 30rpx; background: #999; margin-left: 4rpx; animation: blink 0.8s infinite; vertical-align: middle; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-.recalled-tip { font-size: 24rpx; color: #999; text-align: center; padding: 8rpx; }
-.status-row { display: flex; justify-content: flex-end; align-items: center; margin-top: 4rpx; }
-.status-sending { display: flex; align-items: center; }
-.spinner { width: 24rpx; height: 24rpx; border: 3rpx solid #ccc; border-top-color: #07c160; border-radius: 50%; animation: spin 0.6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.status-failed { display: flex; align-items: center; gap: 2rpx; }
-.failed-text { font-size: 18rpx; color: #ff3b30; }
-.quote-bar-wrap { flex-shrink: 0; padding: 12rpx 24rpx; background: #f5f5f5; border-top: 1rpx solid #e5e5e5; }
-.quote-bar-inner { display: flex; align-items: center; background: #fff; border-radius: 8rpx; padding: 12rpx 16rpx; border-left: 6rpx solid #07c160; }
-.quote-label { font-size: 24rpx; color: #07c160; margin-right: 8rpx; flex-shrink: 0; }
-.quote-preview { font-size: 24rpx; color: #666; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.quote-close { margin-left: 12rpx; flex-shrink: 0; color: #999; }
-.input-area { flex-shrink: 0; padding: 16rpx 24rpx; background: #ffffff; border-top: 1rpx solid #e5e5e5; display: flex; flex-direction: column; gap: 12rpx; }
-.input-toolbar { display: flex; gap: 20rpx; }
-.tool-btn { width: 80rpx; height: 80rpx; display: flex; align-items: center; justify-content: center; svg { width: 48rpx; height: 48rpx; color: #666; } }
-.input-row { display: flex; align-items: center; gap: 16rpx; }
-.msg-input { flex: 1; height: 72rpx; background: #f5f5f5; border-radius: 16rpx; padding: 0 24rpx; font-size: 30rpx; }
-.send-btn { width: 80rpx; height: 80rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #cccccc; .send-icon { width: 40rpx; height: 40rpx; color: #ffffff; } &.active { background: #07c160; } }
-.emoji-panel { flex-shrink: 0; height: 420rpx; background: #f5f5f5; border-top: 1rpx solid #e5e5e5; }
-.emoji-scroll { height: 100%; }
-.emoji-grid { display: flex; flex-wrap: wrap; padding: 16rpx; }
-.emoji-item { width: 12.5%; height: 72rpx; display: flex; align-items: center; justify-content: center; }
-.emoji-char { font-size: 44rpx; }
-.context-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 100; display: flex; align-items: center; justify-content: center; }
-.context-menu { background: #fff; border-radius: 16rpx; padding: 8rpx 0; min-width: 200rpx; box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.15); }
-.ctx-item { padding: 20rpx 32rpx; font-size: 28rpx; color: #1a1a1a; text-align: center; &:active { background: #f5f5f5; } }
-.ctx-danger { color: #ff3b30; }
-.settings-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
-.settings-panel { width: 100%; background: #fff; border-radius: 24rpx 24rpx 0 0; padding: 32rpx; max-height: 70vh; }
-.settings-title { font-size: 32rpx; font-weight: 600; text-align: center; margin-bottom: 32rpx; }
-.settings-item { display: flex; justify-content: space-between; align-items: center; padding: 24rpx 0; border-bottom: 1rpx solid #f0f0f0; font-size: 30rpx; }
-.radio-dot { width: 36rpx; height: 36rpx; border-radius: 50%; border: 3rpx solid #ccc; &.active { border-color: #07c160; background: #07c160; position: relative; &::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16rpx; height: 16rpx; background: #fff; border-radius: 50%; } } }
-.settings-divider { height: 1rpx; background: #e5e5e5; margin: 16rpx 0; }
+
+.upload-text, .failed-text {
+  color: #fff;
+  font-size: 24rpx;
+}
+
+.failed-text {
+  color: #ff3b30;
+}
+
+.bubble-emoji {
+  font-size: 64rpx;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 4rpx;
+  height: 30rpx;
+  background: #999;
+  margin-left: 4rpx;
+  animation: blink 0.8s infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.recalled-tip {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  padding: 8rpx;
+}
+
+.status-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 4rpx;
+}
+
+.status-sending {
+  display: flex;
+  align-items: center;
+}
+
+.spinner {
+  width: 24rpx;
+  height: 24rpx;
+  border: 3rpx solid #ccc;
+  border-top-color: #07c160;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-failed {
+  display: flex;
+  align-items: center;
+  gap: 2rpx;
+}
+
+.failed-text {
+  font-size: 18rpx;
+  color: #ff3b30;
+}
+
+.quote-bar-wrap {
+  flex-shrink: 0;
+  padding: 12rpx 24rpx;
+  background: #f5f5f5;
+  border-top: 1rpx solid #e5e5e5;
+}
+
+.quote-bar-inner {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 8rpx;
+  padding: 12rpx 16rpx;
+  border-left: 6rpx solid #07c160;
+}
+
+.quote-label {
+  font-size: 24rpx;
+  color: #07c160;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.quote-preview {
+  font-size: 24rpx;
+  color: #666;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quote-close {
+  margin-left: 12rpx;
+  flex-shrink: 0;
+  color: #999;
+}
+
+.input-area {
+  flex-shrink: 0;
+  padding: 16rpx 24rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.input-toolbar {
+  display: flex;
+  gap: 20rpx;
+}
+
+.tool-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 48rpx;
+    height: 48rpx;
+    color: #666;
+  }
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.msg-input {
+  flex: 1;
+  height: 72rpx;
+  background: #f5f5f5;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+}
+
+.send-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #cccccc;
+
+  .send-icon {
+    width: 40rpx;
+    height: 40rpx;
+    color: #ffffff;
+  }
+
+  &.active {
+    background: #07c160;
+  }
+}
+
+.emoji-panel {
+  flex-shrink: 0;
+  height: 420rpx;
+  background: #f5f5f5;
+  border-top: 1rpx solid #e5e5e5;
+}
+
+.emoji-scroll {
+  height: 100%;
+}
+
+.emoji-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 16rpx;
+}
+
+.emoji-item {
+  width: 12.5%;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-char {
+  font-size: 44rpx;
+}
+
+.polish-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 120rpx;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  max-height: 50vh;
+  z-index: 90;
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+.polish-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid #e5e5e5;
+}
+
+.polish-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #07c160;
+}
+
+.polish-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.polish-content {
+  padding: 16rpx 32rpx 32rpx;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.polish-loading {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.polish-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.polish-item {
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+
+  &:active {
+    background: #e5e5e5;
+  }
+}
+
+.polish-label {
+  font-size: 22rpx;
+  color: #07c160;
+}
+
+.polish-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+.polish-empty {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.context-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.context-menu {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx 0;
+  min-width: 200rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.15);
+}
+
+.ctx-item {
+  padding: 20rpx 32rpx;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  text-align: center;
+
+  &:active {
+    background: #f5f5f5;
+  }
+}
+
+.ctx-danger {
+  color: #ff3b30;
+}
+
+.settings-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.settings-panel {
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 32rpx;
+  max-height: 70vh;
+}
+
+.settings-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  font-size: 30rpx;
+}
+
+.radio-dot {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 3rpx solid #ccc;
+
+  &.active {
+    border-color: #07c160;
+    background: #07c160;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16rpx;
+      height: 16rpx;
+      background: #fff;
+      border-radius: 50%;
+    }
+  }
+}
+
+.settings-divider {
+  height: 1rpx;
+  background: #e5e5e5;
+  margin: 16rpx 0;
+}
 </style>

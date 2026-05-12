@@ -63,6 +63,14 @@
         "navigationBarTextStyle": "black",
         "backgroundColor": "#f5f5f5"
       }
+    },
+    {
+      "path": "pages/call/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#1a1a2e"
+      }
     }
   ],
   "globalStyle": {

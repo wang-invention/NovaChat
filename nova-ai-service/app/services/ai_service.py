@@ -5,12 +5,14 @@ AI 服务层
 """
 import time
 import uuid
+import os
 from datetime import datetime
-from typing import AsyncGenerator
+from typing import AsyncGenerator, List
 from app.models.schemas import (
     ChatRequest, ChatResponse, ChatChoice, Message,
-    ChatStreamResponse, StreamChoice
+    ChatStreamResponse, StreamChoice, PolishResponse
 )
+from app.core.config import settings
 
 
 class AIService:
@@ -27,16 +29,35 @@ class AIService:
         Returns:
             对话响应
         """
-        # 获取最后一条用户消息
         user_message = request.messages[-1].content if request.messages else ""
 
-        # Mock 响应（后续替换为真实 AI 调用）
-        response_content = AIService._generate_mock_response(user_message)
+        try:
+            from langchain_openai import ChatOpenAI
+            from langchain_core.messages import HumanMessage
+
+            api_key = settings.DEEPSEEK_API_KEY
+            if not api_key or api_key == "your-deepseek-api-key":
+                response_content = AIService._generate_mock_response(user_message)
+            else:
+                llm = ChatOpenAI(
+                    model=settings.DEEPSEEK_MODEL,
+                    api_key=api_key,
+                    base_url=settings.DEEPSEEK_BASE_URL,
+                    temperature=request.temperature or 0.7,
+                    max_tokens=request.max_tokens or 2048,
+                )
+                messages = [HumanMessage(content=m.content) for m in request.messages]
+                response = await llm.ainvoke(messages)
+                response_content = response.content
+
+        except Exception as e:
+            print(f"[AI Service] LangChain 调用失败: {e}")
+            response_content = AIService._generate_mock_response(user_message)
 
         return ChatResponse(
             id=f"chat-{uuid.uuid4().hex[:8]}",
             created=int(time.time()),
-            model=request.model or "gpt-3.5-turbo",
+            model=request.model or settings.DEEPSEEK_MODEL,
             choices=[
                 ChatChoice(
                     index=0,
@@ -60,23 +81,40 @@ class AIService:
         Yields:
             SSE 格式的数据流
         """
-        # 获取最后一条用户消息
         user_message = request.messages[-1].content if request.messages else ""
 
-        # Mock 响应内容
-        response_content = AIService._generate_mock_response(user_message)
+        try:
+            from langchain_openai import ChatOpenAI
+            from langchain_core.messages import HumanMessage
 
-        # 模拟流式输出，将内容分成多个 chunk
-        chunk_size = 5  # 每个 chunk 的字符数
-        chunks = [response_content[i:i+chunk_size]
-                  for i in range(0, len(response_content), chunk_size)]
+            api_key = settings.DEEPSEEK_API_KEY
+            if not api_key or api_key == "your-deepseek-api-key":
+                response_content = AIService._generate_mock_response(user_message)
+                chunks = [response_content[i:i+5] for i in range(0, len(response_content), 5)]
+            else:
+                llm = ChatOpenAI(
+                    model=settings.DEEPSEEK_MODEL,
+                    api_key=api_key,
+                    base_url=settings.DEEPSEEK_BASE_URL,
+                    temperature=request.temperature or 0.7,
+                    max_tokens=request.max_tokens or 2048,
+                    streaming=True,
+                )
+                messages = [HumanMessage(content=m.content) for m in request.messages]
+                response = await llm.ainvoke(messages)
+                response_content = response.content
+                chunks = [response_content[i:i+5] for i in range(0, len(response_content), 5)]
+
+        except Exception as e:
+            print(f"[AI Service] LangChain 流式调用失败: {e}")
+            response_content = AIService._generate_mock_response(user_message)
+            chunks = [response_content[i:i+5] for i in range(0, len(response_content), 5)]
 
         response_id = f"chat-{uuid.uuid4().hex[:8]}"
         created = int(time.time())
-        model = request.model or "gpt-3.5-turbo"
+        model = request.model or settings.DEEPSEEK_MODEL
 
         for i, chunk in enumerate(chunks):
-            # 构建流式响应
             stream_response = ChatStreamResponse(
                 id=response_id,
                 created=created,
@@ -89,15 +127,70 @@ class AIService:
                     )
                 ]
             )
-
-            # 返回 SSE 格式数据
             yield f"data: {stream_response.model_dump_json()}\n\n"
+            await __import__('asyncio').sleep(0.05)
 
-            # 模拟延迟
-            await __import__('asyncio').sleep(0.1)
-
-        # 发送结束标记
         yield "data: [DONE]\n\n"
+
+    @staticmethod
+    async def polish_message(text: str) -> PolishResponse:
+        """
+        消息润色功能
+        使用 LangChain + DeepSeek API 对消息进行润色
+
+        Args:
+            text: 需要润色的原文
+
+        Returns:
+            4种风格的润色结果
+        """
+        try:
+            from langchain_openai import ChatOpenAI
+            from langchain_core.messages import HumanMessage
+            from langchain_core.prompts import ChatPromptTemplate
+            from langchain_core.output_parsers import StrOutputParser
+        except ImportError:
+            return PolishResponse(results=[
+                f"[Mock] 温柔亲切版：{text}",
+                f"[Mock] 幽默轻松版：{text}",
+                f"[Mock] 高情商版：{text}",
+                f"[Mock] 简洁正式版：{text}",
+            ])
+
+        api_key = settings.DEEPSEEK_API_KEY
+        if not api_key or api_key == "your-deepseek-api-key":
+            return PolishResponse(results=[
+                f"[请配置 DeepSeek API Key] 温柔亲切版：{text}",
+                f"[请配置 DeepSeek API Key] 幽默轻松版：{text}",
+                f"[请配置 DeepSeek API Key] 高情商版：{text}",
+                f"[请配置 DeepSeek API Key] 简洁正式版：{text}",
+            ])
+
+        llm = ChatOpenAI(
+            model=settings.DEEPSEEK_MODEL,
+            api_key=api_key,
+            base_url=settings.DEEPSEEK_BASE_URL,
+            temperature=0.8,
+        )
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", """你是一个聊天话术助手，负责帮用户润色聊天消息，要求：
+1. 保持原意不变，不改变用户想表达的核心意思
+2. 只优化语气、表达方式，让句子更自然、更好听、更得体
+3. 分4个风格返回，每个风格只给一句话，不要多余解释：
+   - 温柔亲切版
+   - 幽默轻松版
+   - 高情商版
+   - 简洁正式版
+4. 不要加表情、不要加序号，只返回纯文字句子"""),
+            ("human", "{text}")
+        ])
+
+        chain = prompt | llm | StrOutputParser()
+        result = chain.invoke({"text": text})
+
+        lines = [line.strip() for line in result.split("\n") if line.strip()]
+        return PolishResponse(results=lines[:4] if len(lines) >= 4 else lines)
 
     @staticmethod
     def _generate_mock_response(user_message: str) -> str:

@@ -2,6 +2,8 @@ package com.wang.novachat.chat.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wang.novachat.chat.dto.SendMessageDTO;
+import com.wang.novachat.chat.entity.CallRecord;
+import com.wang.novachat.chat.service.CallService;
 import com.wang.novachat.chat.service.ChatService;
 import com.wang.novachat.chat.vo.MessageVO;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ChatService chatService;
+    private final CallService callService;
     private final ObjectMapper objectMapper;
 
     private static final Map<Long, WebSocketSession> ONLINE_USERS = new ConcurrentHashMap<>();
@@ -76,6 +79,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 pushToUser(senderId, push);
             } else if ("read".equals(wsMsg.getType())) {
                 chatService.markRead(senderId, wsMsg.getConversationId());
+            } else if ("call".equals(wsMsg.getType())) {
+                handleCallSignal(senderId, wsMsg);
+            } else if ("accept".equals(wsMsg.getType())) {
+                handleCallSignal(senderId, wsMsg);
+            } else if ("reject".equals(wsMsg.getType())) {
+                handleCallSignal(senderId, wsMsg);
+            } else if ("hangup".equals(wsMsg.getType())) {
+                handleCallSignal(senderId, wsMsg);
+            } else if ("sdp".equals(wsMsg.getType()) || "ice".equals(wsMsg.getType())) {
+                handleCallSignal(senderId, wsMsg);
             }
         } catch (Exception e) {
             log.error("WebSocket handle message error: {}", e.getMessage(), e);
@@ -111,6 +124,84 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         return session != null && session.isOpen();
     }
 
+    private void handleCallSignal(Long senderId, WsMessage wsMsg) {
+        String signalType = wsMsg.getType();
+        Long targetUserId = wsMsg.getTo();
+        Long callId = wsMsg.getCallId();
+
+        try {
+            switch (signalType) {
+                case "call" -> {
+                    if (!isOnline(targetUserId)) {
+                        pushToUser(senderId, new WsPushMessage("call_busy",
+                                Map.of("message", "对方不在线")));
+                        return;
+                    }
+                    CallRecord record = callService.initiateCall(senderId, targetUserId);
+                    WsPushMessage incoming = new WsPushMessage("call_incoming", Map.of(
+                            "callId", record.getId(),
+                            "callerId", senderId,
+                            "callType", "audio"
+                    ));
+                    pushToUser(targetUserId, incoming);
+                    pushToUser(senderId, new WsPushMessage("call_ringing", Map.of(
+                            "callId", record.getId()
+                    )));
+                }
+                case "accept" -> {
+                    CallRecord record = callService.acceptCall(callId, senderId);
+                    Long peerId = record.getCallerId().equals(senderId)
+                            ? record.getCalleeId() : record.getCallerId();
+                    pushToUser(peerId, new WsPushMessage("call_accepted", Map.of(
+                            "callId", callId
+                    )));
+                }
+                case "reject" -> {
+                    CallRecord record = callService.rejectCall(callId, senderId);
+                    Long peerId = record.getCallerId().equals(senderId)
+                            ? record.getCalleeId() : record.getCallerId();
+                    pushToUser(peerId, new WsPushMessage("call_rejected", Map.of(
+                            "callId", callId
+                    )));
+                }
+                case "hangup" -> {
+                    CallRecord record = callService.hangupCall(callId, senderId);
+                    Long peerId = record.getCallerId().equals(senderId)
+                            ? record.getCalleeId() : record.getCallerId();
+                    pushToUser(peerId, new WsPushMessage("call_hangup", Map.of(
+                            "callId", callId,
+                            "duration", record.getDuration()
+                    )));
+                    pushToUser(senderId, new WsPushMessage("call_ended", Map.of(
+                            "callId", callId,
+                            "duration", record.getDuration()
+                    )));
+                }
+                case "sdp" -> {
+                    pushToUser(targetUserId, new WsPushMessage("call_sdp", Map.of(
+                            "callId", callId,
+                            "sdp", wsMsg.getSdp(),
+                            "from", senderId
+                    )));
+                }
+                case "ice" -> {
+                    pushToUser(targetUserId, new WsPushMessage("call_ice", Map.of(
+                            "callId", callId,
+                            "candidate", wsMsg.getCandidate(),
+                            "sdpMid", wsMsg.getSdpMid(),
+                            "sdpMLineIndex", wsMsg.getSdpMLineIndex(),
+                            "from", senderId
+                    )));
+                }
+            }
+        } catch (Exception e) {
+            log.error("Call signal error: type={}, sender={}, error={}", signalType, senderId, e.getMessage());
+            pushToUser(senderId, new WsPushMessage("call_error", Map.of(
+                    "message", e.getMessage()
+            )));
+        }
+    }
+
     private Long extractUserId(WebSocketSession session) {
         URI uri = session.getUri();
         if (uri == null) return null;
@@ -141,6 +232,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         private Long quoteId;
         private Long messageId;
         private Long conversationId;
+        private Long callId;
+        private String sdp;
+        private String candidate;
+        private String sdpMid;
+        private Integer sdpMLineIndex;
     }
 
     @lombok.Data
