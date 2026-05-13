@@ -8,7 +8,6 @@ public final class CommonConstant {
     private CommonConstant() {
     }
 
-
     /** HTTP 鉴权头 */
     public static final String HEADER_AUTHORIZATION = "Authorization";
 
