@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -137,9 +138,9 @@ public class UserController {
     }
 
     @Operation(summary = "上传头像", description = "上传用户头像图片，返回图片URL")
-    @PostMapping("/avatar")
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<FileUploadResult> uploadAvatar(
-            @Parameter(description = "头像图片文件", required = true) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "头像图片文件", required = true, schema = @Schema(type = "string", format = "binary")) @RequestParam("file") MultipartFile file,
             HttpServletRequest request) {
         Long userId = requireUserId(request);
         FileUploadResult result = fileService.uploadAvatar(userId, file);
@@ -147,9 +148,9 @@ public class UserController {
     }
 
     @Operation(summary = "上传图片", description = "上传聊天图片，返回图片URL")
-    @PostMapping("/image")
+    @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<FileUploadResult> uploadImage(
-            @Parameter(description = "图片文件", required = true) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "图片文件", required = true, schema = @Schema(type = "string", format = "binary")) @RequestParam("file") MultipartFile file,
             HttpServletRequest request) {
         Long userId = requireUserId(request);
         FileUploadResult result = fileService.uploadImage(userId, file);
