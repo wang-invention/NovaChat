@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'nova-gateway/**'
+      - 'nova-common/**'
   workflow_dispatch:
 
 env:
