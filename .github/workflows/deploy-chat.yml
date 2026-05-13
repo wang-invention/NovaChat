@@ -1,20 +1,20 @@
-name: Deploy Gateway
+name: Deploy Chat Service
 
 on:
   push:
     branches: [main]
     paths:
-      - 'nova-gateway/**'
+      - 'nova-chat/**'
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/nova-gateway
+  IMAGE_NAME: ${{ github.repository }}/nova-chat
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-
 
       - name: Build with Maven
-        working-directory: nova-gateway
+        working-directory: nova-chat
         run: mvn clean package -DskipTests
 
       - name: Set up Docker Buildx
@@ -58,8 +58,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: nova-gateway
-          dockerfile: nova-gateway/Dockerfile
+          context: nova-chat
+          dockerfile: nova-chat/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -78,57 +78,56 @@ jobs:
           apiVersion: apps/v1
           kind: Deployment
           metadata:
-            name: nova-gateway
+            name: nova-chat
             namespace: novachat
           spec:
             replicas: 1
             selector:
               matchLabels:
-                app: nova-gateway
+                app: nova-chat
             template:
               metadata:
                 labels:
-                  app: nova-gateway
+                  app: nova-chat
               spec:
                 containers:
-                - name: nova-gateway
+                - name: nova-chat
                   image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
                   ports:
-                  - containerPort: 8087
+                  - containerPort: 8002
                   resources:
                     requests:
-                      memory: "256Mi"
-                      cpu: "150m"
-                    limits:
                       memory: "512Mi"
-                      cpu: "300m"
+                      cpu: "250m"
+                    limits:
+                      memory: "768Mi"
+                      cpu: "500m"
                   livenessProbe:
                     tcpSocket:
-                      port: 8087
+                      port: 8002
                     initialDelaySeconds: 30
                     periodSeconds: 10
                   readinessProbe:
                     tcpSocket:
-                      port: 8087
+                      port: 8002
                     initialDelaySeconds: 10
                     periodSeconds: 5
           ---
           apiVersion: v1
           kind: Service
           metadata:
-            name: nova-gateway
+            name: nova-chat
             namespace: novachat
           spec:
-            type: NodePort
+            type: ClusterIP
             selector:
-              app: nova-gateway
+              app: nova-chat
             ports:
-            - port: 8087
-              targetPort: 8087
-              nodePort: 30087
+            - port: 8002
+              targetPort: 8002
           EOF
 
       - name: Verify deployment
         run: |
-          kubectl rollout status deployment/nova-gateway -n novachat --timeout=120s
-          kubectl get pods -n novachat -l app=nova-gateway
+          kubectl rollout status deployment/nova-chat -n novachat --timeout=120s
+          kubectl get pods -n novachat -l app=nova-chat
