@@ -8,7 +8,7 @@ public final class CommonConstant {
     private CommonConstant() {
     }
 
-    /** HTTP 鉴权头 */
+    /** HTTP 鉴权头1 */
     public static final String HEADER_AUTHORIZATION = "Authorization";
 
     /** JWT Token 前缀 */
