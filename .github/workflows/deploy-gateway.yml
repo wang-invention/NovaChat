@@ -100,7 +100,7 @@ jobs:
               spec:
                 containers:
                 - name: nova-gateway
-                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
                   ports:
                   - containerPort: 8087
                   resources:
