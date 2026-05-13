@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/nova-user
+  IMAGE_NAME:  wang-invention/nova-user
 
 jobs:
   build-and-deploy:

@@ -15,7 +15,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/nova-gateway
+  IMAGE_NAME:  wang-invention/nova-gateway
 
 jobs:
   build-and-deploy:

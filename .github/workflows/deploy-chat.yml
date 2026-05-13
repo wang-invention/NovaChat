@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/nova-chat
+  IMAGE_NAME:  wang-invention/nova-chat
 
 jobs:
   build-and-deploy:
