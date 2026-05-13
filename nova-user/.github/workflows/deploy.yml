@@ -1,0 +1,133 @@
+name: Deploy User Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nova-user/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/nova-user
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Build with Maven
+        working-directory: nova-user
+        run: mvn clean package -DskipTests
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: nova-user
+          dockerfile: nova-user/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
+          echo "KUBE_CONFIG_PATH=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
+
+      - name: Deploy to k3s
+        run: |
+          kubectl apply -f - <<EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: nova-user
+            namespace: novachat
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: nova-user
+            template:
+              metadata:
+                labels:
+                  app: nova-user
+              spec:
+                containers:
+                - name: nova-user
+                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+                  ports:
+                  - containerPort: 8001
+                  resources:
+                    requests:
+                      memory: "256Mi"
+                      cpu: "100m"
+                    limits:
+                      memory: "512Mi"
+                      cpu: "300m"
+                  livenessProbe:
+                    tcpSocket:
+                      port: 8001
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+                  readinessProbe:
+                    tcpSocket:
+                      port: 8001
+                    initialDelaySeconds: 10
+                    periodSeconds: 5
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: nova-user
+            namespace: novachat
+          spec:
+            type: ClusterIP
+            selector:
+              app: nova-user
+            ports:
+            - port: 8001
+              targetPort: 8001
+          EOF
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/nova-user -n novachat --timeout=120s
+          kubectl get pods -n novachat -l app=nova-user
