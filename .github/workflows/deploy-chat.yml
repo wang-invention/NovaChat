@@ -33,8 +33,9 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-
 
       - name: Build with Maven
-        working-directory: nova-chat
-        run: mvn clean package -DskipTests
+        run: |
+          mvn clean install -DskipTests -pl nova-common
+          mvn clean package -DskipTests -pl nova-chat -am
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
