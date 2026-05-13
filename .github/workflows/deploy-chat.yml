@@ -6,7 +6,7 @@ permissions:
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'nova-chat/**'
       - 'nova-common/**'
@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME:  wang-invention/nova-chat
+  IMAGE_NAME: wang-invention/nova-chat
 
 jobs:
   build-and-deploy:
@@ -77,6 +77,9 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+
+      - name: Create namespace if not exists
+        run: kubectl create namespace novachat || true
 
       - name: Deploy to k3s
         run: |
