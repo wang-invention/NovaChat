@@ -1,5 +1,10 @@
 name: Deploy Gateway
 
+
+permissions:
+  packages: write
+  contents: read
+
 on:
   push:
     branches: [main]

@@ -1,5 +1,9 @@
 name: Deploy User Service
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   push:
     branches: [main]

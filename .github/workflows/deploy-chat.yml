@@ -1,5 +1,9 @@
 name: Deploy Chat Service
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   push:
     branches: [main]
