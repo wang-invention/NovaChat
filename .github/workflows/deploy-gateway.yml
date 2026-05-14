@@ -46,10 +46,14 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # 无密码，直接登录
-      - name: Login to private registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY_PUSH }}
+#      - name: Login to private registry
+#        uses: docker/login-action@v3
+#        with:
+#          registry: ${{ env.REGISTRY_PUSH }}
+      - name: Allow insecure registry
+        run: |
+          echo '{"insecure-registries": ["${{ env.REGISTRY_PUSH }}"]}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
