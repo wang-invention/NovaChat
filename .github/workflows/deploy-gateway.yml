@@ -39,7 +39,7 @@ jobs:
 
       - name: Build with Maven
         run: |
-          mvn clean install -DskipTests -pl nova-common
+          mvn clean install -DskipTests -pl .,nova-common
           cd nova-gateway
           mvn clean package spring-boot:repackage -DskipTests
 
