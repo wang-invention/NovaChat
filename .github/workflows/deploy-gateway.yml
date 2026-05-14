@@ -13,13 +13,13 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: docker.io
+  REGISTRY_PUSH: 129.211.0.210:15000   # GitHub 外网推送
+  REGISTRY_PULL: 192.168.1.101:5000    # K3s 内网拉取
   IMAGE_NAME: wangfaming666/nova-gateway
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,20 +45,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      # 无密码，直接登录
+      - name: Login to private registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix=
-            type=raw,value=latest
+          registry: ${{ env.REGISTRY_PUSH }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -66,8 +57,7 @@ jobs:
           context: nova-gateway
           file: nova-gateway/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ env.REGISTRY_PUSH }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
@@ -100,13 +90,13 @@ jobs:
               spec:
                 containers:
                 - name: nova-gateway
-                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+                  image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
                   ports:
                   - containerPort: 8087
                   resources:
                     requests:
                       memory: "512Mi"
-                      cpu: "250m"
+                        cpu: "250m"
                     limits:
                       memory: "768Mi"
                       cpu: "500m"
