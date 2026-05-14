@@ -101,7 +101,7 @@ jobs:
                 - name: nova-chat
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
                   ports:
-                  - containerPort: 8002
+                  - containerPort: 30000
                   resources:
                     requests:
                       memory: "512Mi"
@@ -111,12 +111,12 @@ jobs:
                       cpu: "500m"
                   livenessProbe:
                     tcpSocket:
-                      port: 8002
+                      port: 30000
                     initialDelaySeconds: 30
                     periodSeconds: 10
                   readinessProbe:
                     tcpSocket:
-                      port: 8002
+                      port: 30000
                     initialDelaySeconds: 10
                     periodSeconds: 5
           ---
@@ -130,8 +130,8 @@ jobs:
             selector:
               app: nova-chat
             ports:
-            - port: 8002
-              targetPort: 8002
+            - port: 30000
+              targetPort: 30000
           EOF
 
       - name: Verify deployment
