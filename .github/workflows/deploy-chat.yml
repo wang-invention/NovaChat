@@ -41,7 +41,8 @@ jobs:
       - name: Build with Maven
         run: |
           mvn clean install -DskipTests -pl nova-common
-          mvn clean package -DskipTests -pl nova-chat -am
+          cd nova-chat
+          mvn clean package spring-boot:repackage -DskipTests
 
       - name: Login to cnb.cool registry
         uses: docker/login-action@v2
