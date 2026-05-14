@@ -18,6 +18,8 @@ public class RedisConfig {
 
 
 
+
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate(
             StringRedisTemplate stringRedisTemplate) {

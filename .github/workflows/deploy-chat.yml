@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_PUSH: 129.211.0.210:15000
-  REGISTRY_PULL: 192.168.1.101:5000
-  IMAGE_NAME: wangfaming666/nova-chat
+  REGISTRY_PUSH: docker.cnb.cool
+  REGISTRY_PULL: docker.cnb.cool
+  IMAGE_NAME: wang.ux/nova-chat
 
 jobs:
   build-and-deploy:
@@ -43,15 +43,13 @@ jobs:
           mvn clean install -DskipTests -pl nova-common
           mvn clean package -DskipTests -pl nova-chat -am
 
-      # 登录私有 HTTP 仓库（非安全）
-      - name: Login to HTTP registry
+      - name: Login to cnb.cool registry
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY_PUSH }}
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      # 构建并推送镜像
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -69,7 +67,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # 设置 kubectl
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
 
@@ -81,7 +78,6 @@ jobs:
       - name: Create namespace if not exists
         run: kubectl create namespace novachat || true
 
-      # 部署到 k3s
       - name: Deploy to k3s
         run: |
           kubectl apply -f - <<EOF

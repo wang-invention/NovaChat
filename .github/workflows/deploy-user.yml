@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_PUSH: 129.211.0.210:15000
-  REGISTRY_PULL: 192.168.1.101:5000
-  IMAGE_NAME: wangfaming666/nova-user
+  REGISTRY_PUSH: docker.cnb.cool
+  REGISTRY_PULL: docker.cnb.cool
+  IMAGE_NAME: wang.ux/nova-user
 
 jobs:
   build-and-deploy:

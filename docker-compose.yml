@@ -1,0 +1,151 @@
+version: '3.8'
+
+networks:
+  novachat:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+  nacos_data:
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: novachat-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: novachat
+      MYSQL_USER: novachat
+      MYSQL_PASSWORD: novachat123
+    ports:
+      - "13306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - novachat
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: novachat-redis
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - novachat
+
+  # MinIO 对象存储
+  minio:
+    image: minio/minio:latest
+    container_name: novachat-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - novachat
+
+  # Nacos 注册中心
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    container_name: novachat-nacos
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: novachat
+      MYSQL_SERVICE_USER: novachat
+      MYSQL_SERVICE_PASSWORD: novachat123
+      PREFER_HOST_MODE: hostname
+    ports:
+      - "18848:8848"
+      - "19848:9848"
+    volumes:
+      - nacos_data:/home/nacos/data
+    depends_on:
+      - mysql
+    networks:
+      - novachat
+
+  # Gateway 网关
+  gateway:
+    build:
+      context: ./nova-gateway
+      dockerfile: Dockerfile
+    container_name: novachat-gateway
+    restart: unless-stopped
+    ports:
+      - "10000:8087"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER-ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER-ADDR: nacos:8848
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    depends_on:
+      - nacos
+    networks:
+      - novachat
+
+  # User 用户服务
+  user:
+    build:
+      context: ./nova-user
+      dockerfile: Dockerfile
+    container_name: novachat-user
+    restart: unless-stopped
+    ports:
+      - "10001:8001"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER-ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER-ADDR: nacos:8848
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/novachat?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: novachat
+      SPRING_DATASOURCE_PASSWORD: novachat123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    depends_on:
+      - mysql
+      - redis
+      - nacos
+    networks:
+      - novachat
+
+  # Chat 聊天服务
+  chat:
+    build:
+      context: ./nova-chat
+      dockerfile: Dockerfile
+    container_name: novachat-chat
+    restart: unless-stopped
+    ports:
+      - "10002:8002"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER-ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER-ADDR: nacos:8848
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/novachat?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: novachat
+      SPRING_DATASOURCE_PASSWORD: novachat123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JAVA_OPTS: "-Xmx256m -Xms128m"
+    depends_on:
+      - mysql
+      - redis
+      - nacos
+    networks:
+      - novachat

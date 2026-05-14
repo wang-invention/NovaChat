@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_PUSH: 129.211.0.210:15000   # GitHub 外网推送
-  REGISTRY_PULL: 192.168.1.101:5000    # K3s 内网拉取
-  IMAGE_NAME: wangfaming666/nova-gateway
+  REGISTRY_PUSH: docker.cnb.cool
+  REGISTRY_PULL: docker.cnb.cool
+  IMAGE_NAME: wang.ux/nova-gateway
 
 jobs:
   build-and-deploy:
@@ -45,15 +45,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 无密码，直接登录
-#      - name: Login to private registry
-#        uses: docker/login-action@v3
-#        with:
-#          registry: ${{ env.REGISTRY_PUSH }}
-      - name: Allow insecure registry
-        run: |
-          echo '{"insecure-registries": ["${{ env.REGISTRY_PUSH }}"]}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
+      # 👇 登录 cnb.cool（必须开启）
+      - name: Login to cnb.cool registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_PUSH }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # 👇 删除旧的 insecure registry 配置
+      # - name: Allow insecure registry
+      #   run: |
+      #     echo '{"insecure-registries": ["${{ env.REGISTRY_PUSH }}"]}' | sudo tee /etc/docker/daemon.json
+      #     sudo systemctl restart docker
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -100,7 +104,7 @@ jobs:
                   resources:
                     requests:
                       memory: "512Mi"
-                        cpu: "250m"
+                      cpu: "250m"
                     limits:
                       memory: "768Mi"
                       cpu: "500m"
