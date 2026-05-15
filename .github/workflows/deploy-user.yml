@@ -46,10 +46,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-#      - name: Login to private registry
-#        uses: docker/login-action@v3
-#        with:
-#          registry: ${{ env.REGISTRY_PUSH }}
+      # 👇 登录 cnb.cool（必须开启）
+      - name: Login to cnb.cool registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_PUSH }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
 
       - name: Allow insecure registry
         run: |

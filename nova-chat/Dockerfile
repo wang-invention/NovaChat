@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY target/nova-chat.jar app.jar
 
-EXPOSE 8002
+EXPOSE 30000
 
 ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
 

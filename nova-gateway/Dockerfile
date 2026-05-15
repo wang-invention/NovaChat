@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY target/nova-gateway.jar app.jar
 
-EXPOSE 8087
+EXPOSE 10000
 
 ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
 

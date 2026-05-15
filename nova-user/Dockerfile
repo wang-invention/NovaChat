@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY target/nova-user.jar app.jar
 
-EXPOSE 8001
+EXPOSE 20000
 
 ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
 
