@@ -5,6 +5,9 @@ package com.wang.novachat.common.constant;
  */
 public final class CommonConstant {
 
+
+
+
     private CommonConstant() {
     }
 

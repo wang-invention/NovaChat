@@ -105,6 +105,11 @@ jobs:
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
                   ports:
                   - containerPort: 10000
+                  env:
+                  - name: SPRING_PROFILES_ACTIVE
+                    value: "prod"
+                  - name: NACOS_SERVER_ADDR
+                    value: "nacos"
                   resources:
                     requests:
                       memory: "512Mi"
