@@ -89,6 +89,8 @@ jobs:
             namespace: novachat
           spec:
             replicas: 1
+            strategy:
+                type: Recreate
             selector:
               matchLabels:
                 app: nova-user
