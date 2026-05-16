@@ -93,6 +93,9 @@ springdoc:
         name: 用户服务
       - url: /v3/api-docs/chat
         name: 聊天服务
+    servers:
+      - url: http://129.211.0.210:30087
+        description: 网关地址
 
 logging:
   level:

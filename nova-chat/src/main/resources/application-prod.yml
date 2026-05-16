@@ -53,6 +53,6 @@ springdoc:
   swagger-ui:
     enabled: true
   packages-to-scan: com.wang.novachat.chat.controller
-  overridden:
-    server: http://129.211.0.210:30080
-    context-path: /api/chat
+#  overridden:
+#    server: http://129.211.0.210:30087
+#    context-path: /api/chat
