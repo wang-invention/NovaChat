@@ -54,5 +54,5 @@ springdoc:
     enabled: true
   packages-to-scan: com.wang.novachat.chat.controller
   overridden:
-    server: http://129.211.0.210:8080
+    server: http://129.211.0.210:30080
     context-path: /api/chat

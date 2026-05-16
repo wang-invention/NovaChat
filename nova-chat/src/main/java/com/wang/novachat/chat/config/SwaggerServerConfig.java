@@ -44,7 +44,7 @@ public class SwaggerServerConfig {
         return openApi -> {
             openApi.getServers().clear();
             // 关键：这里必须是网关地址 + 你的路由前缀
-            openApi.addServersItem(new Server().url("http://129.211.0.210:8080/api/chat"));
+            openApi.addServersItem(new Server().url("http://129.211.0.210:30087/api/chat"));
         };
     }
 }

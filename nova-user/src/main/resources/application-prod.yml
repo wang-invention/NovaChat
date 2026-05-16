@@ -72,5 +72,5 @@ springdoc:
     enabled: true
   packages-to-scan: com.wang.novachat.user.controller
   servers:
-    - url: http://129.211.0.210:8080/api/user
+    - url: http://129.211.0.210:30080/api/user
       description: 网关公网地址
