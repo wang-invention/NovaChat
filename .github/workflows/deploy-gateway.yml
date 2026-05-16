@@ -39,8 +39,8 @@ jobs:
 
       - name: Build with Maven
         run: |
-          mvn clean install -DskipTests -pl.,nova-common -am
-          cd nova-gateway
+          mvn clean install -DskipTests -pl .,nova-common
+          cd nova-chat
           mvn clean package spring-boot:repackage -DskipTests
 
 
@@ -104,7 +104,7 @@ jobs:
                 - name: nova-gateway
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
                   ports:
-                  - containerPort: 8080
+                  - containerPort: 10000
                   env:
                   - name: SPRING_PROFILES_ACTIVE
                     value: "prod"
@@ -119,12 +119,12 @@ jobs:
                       cpu: "500m"
                   livenessProbe:
                     tcpSocket:
-                      port: 8080
+                      port: 10000
                     initialDelaySeconds: 30
                     periodSeconds: 10
                   readinessProbe:
                     tcpSocket:
-                      port: 8080
+                      port: 10000
                     initialDelaySeconds: 10
                     periodSeconds: 5
           ---
@@ -138,8 +138,8 @@ jobs:
             selector:
               app: nova-gateway
             ports:
-            - port: 8080
-              targetPort: 8080
+            - port: 10000
+              targetPort: 10000
               nodePort: 30087
           EOF
 
