@@ -104,7 +104,7 @@ jobs:
                 - name: nova-gateway
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
                   ports:
-                  - containerPort: 10000
+                  - containerPort: 8080
                   env:
                   - name: SPRING_PROFILES_ACTIVE
                     value: "prod"
@@ -119,12 +119,12 @@ jobs:
                       cpu: "500m"
                   livenessProbe:
                     tcpSocket:
-                      port: 10000
+                      port: 8080
                     initialDelaySeconds: 30
                     periodSeconds: 10
                   readinessProbe:
                     tcpSocket:
-                      port: 10000
+                      port: 8080
                     initialDelaySeconds: 10
                     periodSeconds: 5
           ---
@@ -138,8 +138,8 @@ jobs:
             selector:
               app: nova-gateway
             ports:
-            - port: 10000
-              targetPort: 10000
+            - port: 8080
+              targetPort: 8080
               nodePort: 30087
           EOF
 

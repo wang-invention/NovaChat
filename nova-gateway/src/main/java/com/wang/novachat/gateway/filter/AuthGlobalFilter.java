@@ -36,6 +36,8 @@ import java.util.List;
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
 
+
+
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private final JwtService jwtService;
