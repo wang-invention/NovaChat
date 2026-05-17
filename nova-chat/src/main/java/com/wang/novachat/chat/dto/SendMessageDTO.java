@@ -9,9 +9,11 @@ import lombok.Data;
 @Data
 public class SendMessageDTO {
 
-    @Schema(description = "接收者用户ID", example = "2")
-    @NotNull(message = "接收者ID不能为空")
+    @Schema(description = "接收者用户ID(私聊时必填)", example = "2")
     private Long receiverId;
+
+    @Schema(description = "群ID(群聊时必填)", example = "1")
+    private Long groupId;
 
     @Schema(description = "消息类型: text/text/image/audio/video", example = "text")
     @NotBlank(message = "消息类型不能为空")

@@ -3,6 +3,8 @@ package com.wang.novachat.chat.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wang.novachat.chat.dto.SendMessageDTO;
 import com.wang.novachat.chat.entity.CallRecord;
+import com.wang.novachat.chat.entity.GroupMember;
+import com.wang.novachat.chat.mapper.GroupMemberMapper;
 import com.wang.novachat.chat.service.CallService;
 import com.wang.novachat.chat.service.ChatService;
 import com.wang.novachat.chat.vo.MessageVO;
@@ -16,6 +18,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +30,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
     private final CallService callService;
     private final ObjectMapper objectMapper;
+    private final GroupMemberMapper groupMemberMapper;
 
     private static final Map<Long, WebSocketSession> ONLINE_USERS = new ConcurrentHashMap<>();
 
@@ -62,6 +66,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             if ("chat".equals(wsMsg.getType())) {
                 SendMessageDTO dto = new SendMessageDTO();
                 dto.setReceiverId(wsMsg.getTo());
+                dto.setGroupId(wsMsg.getGroupId());
                 dto.setType(wsMsg.getMsgType() != null ? wsMsg.getMsgType() : "text");
                 dto.setContent(wsMsg.getContent());
                 dto.setImageUrl(wsMsg.getImageUrl());
@@ -71,8 +76,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
                 MessageVO saved = chatService.sendMessage(senderId, dto);
 
-                pushToUser(senderId, new WsPushMessage("chat_sent", saved));
-                pushToUser(wsMsg.getTo(), new WsPushMessage("chat_received", saved));
+                if (wsMsg.getGroupId() != null) {
+                    pushToUser(senderId, new WsPushMessage("chat_sent", saved));
+                    pushToGroup(wsMsg.getGroupId(), new WsPushMessage("chat_received", saved));
+                } else {
+                    pushToUser(senderId, new WsPushMessage("chat_sent", saved));
+                    pushToUser(wsMsg.getTo(), new WsPushMessage("chat_received", saved));
+                }
             } else if ("recall".equals(wsMsg.getType())) {
                 chatService.recallMessage(senderId, wsMsg.getMessageId());
                 WsPushMessage push = new WsPushMessage("recalled", Map.of("messageId", wsMsg.getMessageId()));
@@ -122,6 +132,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public boolean isOnline(Long userId) {
         WebSocketSession session = ONLINE_USERS.get(userId);
         return session != null && session.isOpen();
+    }
+
+    private void pushToGroup(Long groupId, Object data) {
+        List<GroupMember> members = groupMemberMapper.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<GroupMember>()
+                        .eq(GroupMember::getGroupId, groupId));
+        for (GroupMember member : members) {
+            pushToUser(member.getUserId(), data);
+        }
     }
 
     private void handleCallSignal(Long senderId, WsMessage wsMsg) {
@@ -224,6 +243,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public static class WsMessage {
         private String type;
         private Long to;
+        private Long groupId;
         private String content;
         private String msgType;
         private String imageUrl;

@@ -4,8 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.wang.novachat.chat.dto.SendMessageDTO;
 import com.wang.novachat.chat.entity.Conversation;
+import com.wang.novachat.chat.entity.Group;
+import com.wang.novachat.chat.entity.GroupMember;
 import com.wang.novachat.chat.entity.Message;
 import com.wang.novachat.chat.mapper.ConversationMapper;
+import com.wang.novachat.chat.mapper.GroupMapper;
+import com.wang.novachat.chat.mapper.GroupMemberMapper;
 import com.wang.novachat.chat.mapper.MessageMapper;
 import com.wang.novachat.chat.service.ChatService;
 import com.wang.novachat.chat.vo.ConversationVO;
@@ -32,17 +36,26 @@ public class ChatServiceImpl implements ChatService {
 
     private final ConversationMapper conversationMapper;
     private final MessageMapper messageMapper;
+    private final GroupMapper groupMapper;
+    private final GroupMemberMapper groupMemberMapper;
     private final RestTemplate restTemplate;
 
     @Override
     @Transactional
     public MessageVO sendMessage(Long senderId, SendMessageDTO dto) {
-        Long conversationId = getOrCreateConversation(senderId, dto.getReceiverId());
+        boolean isGroup = dto.getGroupId() != null;
+        Long conversationId;
+
+        if (isGroup) {
+            conversationId = getGroupConversationId(dto.getGroupId());
+        } else {
+            conversationId = getOrCreateConversation(senderId, dto.getReceiverId());
+        }
 
         Message message = new Message();
         message.setConversationId(conversationId);
         message.setSenderId(senderId);
-        message.setReceiverId(dto.getReceiverId());
+        message.setReceiverId(isGroup ? 0L : dto.getReceiverId());
         message.setType(dto.getType());
         message.setContent(dto.getContent() != null ? dto.getContent() : "");
         message.setImageUrl(dto.getThumbUrl() != null ? dto.getThumbUrl() : (dto.getImageUrl() != null ? dto.getImageUrl() : ""));
@@ -57,7 +70,9 @@ public class ChatServiceImpl implements ChatService {
             String preview = buildPreview(dto);
             conv.setLastMessage(preview);
             conv.setLastMessageTime(LocalDateTime.now());
-            if (conv.getUser1Id().equals(senderId)) {
+            if (isGroup) {
+                conv.setUnreadCountUser2(conv.getUnreadCountUser2() + 1);
+            } else if (conv.getUser1Id().equals(senderId)) {
                 conv.setUnreadCountUser2(conv.getUnreadCountUser2() + 1);
             } else {
                 conv.setUnreadCountUser1(conv.getUnreadCountUser1() + 1);
@@ -70,16 +85,16 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ConversationVO> getConversations(Long userId) {
+        List<ConversationVO> result = new ArrayList<>();
+
         LambdaQueryWrapper<Conversation> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Conversation::getUser1Id, userId)
                 .or()
                 .eq(Conversation::getUser2Id, userId)
                 .orderByDesc(Conversation::getLastMessageTime);
+        List<Conversation> privateConvs = conversationMapper.selectList(wrapper);
 
-        List<Conversation> conversations = conversationMapper.selectList(wrapper);
-
-        List<ConversationVO> result = new ArrayList<>();
-        for (Conversation conv : conversations) {
+        for (Conversation conv : privateConvs) {
             ConversationVO vo = new ConversationVO();
             vo.setId(conv.getId());
 
@@ -93,6 +108,42 @@ public class ChatServiceImpl implements ChatService {
             fillTargetUser(vo, targetUserId);
             result.add(vo);
         }
+
+        LambdaQueryWrapper<GroupMember> memberWrapper = new LambdaQueryWrapper<>();
+        memberWrapper.eq(GroupMember::getUserId, userId);
+        List<GroupMember> memberships = groupMemberMapper.selectList(memberWrapper);
+
+        for (GroupMember member : memberships) {
+            String convKey = "group_" + member.getGroupId();
+            LambdaQueryWrapper<Conversation> convWrapper = new LambdaQueryWrapper<>();
+            convWrapper.eq(Conversation::getConversationKey, convKey);
+            Conversation groupConv = conversationMapper.selectOne(convWrapper);
+
+            if (groupConv != null) {
+                ConversationVO vo = new ConversationVO();
+                vo.setId(groupConv.getId());
+                vo.setTargetUserId(0L);
+                vo.setUnreadCount(groupConv.getUnreadCountUser2());
+                vo.setLastMessage(groupConv.getLastMessage());
+                vo.setLastMessageTime(groupConv.getLastMessageTime());
+
+                Group group = groupMapper.selectById(member.getGroupId());
+                if (group != null) {
+                    vo.setConversationType("GROUP");
+                    vo.setGroupId(group.getId());
+                    vo.setGroupName(group.getName());
+                    vo.setGroupAvatar(group.getAvatar());
+                }
+                result.add(vo);
+            }
+        }
+
+        result.sort((a, b) -> {
+            if (a.getLastMessageTime() == null && b.getLastMessageTime() == null) return 0;
+            if (a.getLastMessageTime() == null) return 1;
+            if (b.getLastMessageTime() == null) return -1;
+            return b.getLastMessageTime().compareTo(a.getLastMessageTime());
+        });
         return result;
     }
 
@@ -176,6 +227,30 @@ public class ChatServiceImpl implements ChatService {
         conv.setConversationKey(key);
         conv.setUser1Id(minId);
         conv.setUser2Id(maxId);
+        conv.setLastMessage("");
+        conv.setUnreadCountUser1(0);
+        conv.setUnreadCountUser2(0);
+        conversationMapper.insert(conv);
+
+        return conv.getId();
+    }
+
+    @Transactional
+    public Long getGroupConversationId(Long groupId) {
+        String key = "group_" + groupId;
+
+        LambdaQueryWrapper<Conversation> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Conversation::getConversationKey, key);
+        Conversation conv = conversationMapper.selectOne(wrapper);
+
+        if (conv != null) {
+            return conv.getId();
+        }
+
+        conv = new Conversation();
+        conv.setConversationKey(key);
+        conv.setUser1Id(groupId);
+        conv.setUser2Id(0L);
         conv.setLastMessage("");
         conv.setUnreadCountUser1(0);
         conv.setUnreadCountUser2(0);

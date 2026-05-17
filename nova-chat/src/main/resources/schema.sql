@@ -67,3 +67,34 @@ CREATE TABLE IF NOT EXISTS t_friend_request (
     KEY idx_to (to_user_id),
     KEY idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='好友申请表';
+
+CREATE TABLE IF NOT EXISTS t_group (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL COMMENT '群名称',
+    avatar VARCHAR(500) DEFAULT '' COMMENT '群头像URL',
+    owner_id BIGINT NOT NULL COMMENT '群主用户ID',
+    announcement VARCHAR(500) DEFAULT '' COMMENT '群公告',
+    max_members INT DEFAULT 200 COMMENT '最大成员数',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_owner (owner_id),
+    KEY idx_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='群聊表';
+
+CREATE TABLE IF NOT EXISTS t_group_member (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    group_id BIGINT NOT NULL COMMENT '群ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    role TINYINT NOT NULL DEFAULT 0 COMMENT '角色: 0成员 1管理员 2群主',
+    nickname_in_group VARCHAR(64) DEFAULT '' COMMENT '群内昵称',
+    muted_until DATETIME DEFAULT NULL COMMENT '禁言截止时间',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_group_user (group_id, user_id),
+    KEY idx_group_id (group_id),
+    KEY idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='群成员表';

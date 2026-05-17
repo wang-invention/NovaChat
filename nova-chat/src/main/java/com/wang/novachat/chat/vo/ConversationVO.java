@@ -17,7 +17,7 @@ public class ConversationVO implements Serializable {
     @Schema(description = "会话ID")
     private Long id;
 
-    @Schema(description = "对方用户ID")
+    @Schema(description = "对方用户ID(群聊时为0)")
     private Long targetUserId;
 
     @Schema(description = "对方昵称")
@@ -25,6 +25,18 @@ public class ConversationVO implements Serializable {
 
     @Schema(description = "对方头像URL")
     private String targetAvatar;
+
+    @Schema(description = "会话类型: PRIVATE/GROUP")
+    private String conversationType;
+
+    @Schema(description = "群ID(群聊时)")
+    private Long groupId;
+
+    @Schema(description = "群名称(群聊时)")
+    private String groupName;
+
+    @Schema(description = "群头像(群聊时)")
+    private String groupAvatar;
 
     @Schema(description = "最后一条消息内容")
     private String lastMessage;

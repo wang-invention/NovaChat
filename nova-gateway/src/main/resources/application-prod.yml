@@ -25,7 +25,7 @@ spring:
             - StripPrefix=2
 
         - id: nova-chat-websocket
-          uri: lb:ws://nova-chat
+          uri: lb://nova-chat
           predicates:
             - Path=/ws/chat/**
 
@@ -77,6 +77,7 @@ nova:
       - /swagger-ui/**
       - /swagger-ui.html
       - /webjars/**
+      - /ws/**
 
 springdoc:
   api-docs:

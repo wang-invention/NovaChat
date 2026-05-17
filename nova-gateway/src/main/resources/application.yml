@@ -27,7 +27,7 @@ spring:
         - id: nova-chat-websocket
           uri: lb://nova-chat
           predicates:
-            - Path=/ws/chat
+            - Path=/ws/chat/**
 
         - id: nova-ai
           uri: http://129.211.0.210:8000
@@ -79,6 +79,7 @@ nova:
       - /swagger-ui/**
       - /swagger-ui.html
       - /webjars/**
+      - /ws/**
 
 springdoc:
   api-docs:
