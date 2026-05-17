@@ -20,6 +20,11 @@ public class AuthProperties {
     private boolean enabled = true;
 
 
+
+
+
+
+
     /** 免鉴权白名单（Ant 路径） */
     private List<String> whiteList = new ArrayList<>();
 }
