@@ -103,6 +103,7 @@ jobs:
                 containers:
                 - name: nova-gateway
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
+                  imagePullPolicy: Always
                   ports:
                   - containerPort: 8080
                   env:

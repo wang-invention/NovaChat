@@ -102,6 +102,7 @@ jobs:
                 containers:
                 - name: nova-user
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
+                  imagePullPolicy: Always
                   ports:
                   - containerPort: 20000
                   env:

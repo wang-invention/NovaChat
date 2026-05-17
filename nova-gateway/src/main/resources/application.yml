@@ -28,6 +28,8 @@ spring:
           uri: lb:ws://nova-chat
           predicates:
             - Path=/ws/chat/**
+          filters:
+            - WebSocketFilter
 
         - id: nova-ai
           uri: http://129.211.0.210:8000
