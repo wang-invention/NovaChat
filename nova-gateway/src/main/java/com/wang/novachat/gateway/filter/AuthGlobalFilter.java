@@ -133,6 +133,14 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> writeUnauthorized(ServerWebExchange exchange,
                                          ResultCode code, String message) {
+        ServerHttpRequest request = exchange.getRequest();
+        log.warn("[Auth] 请求被拦截：path={}, method={}, ip={}, code={}, message={}",
+                request.getURI().getPath(),
+                request.getMethod(),
+                getClientIp(request),
+                code.getCode(),
+                message);
+
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -147,6 +155,20 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         }
         DataBuffer buffer = response.bufferFactory().wrap(bytes);
         return response.writeWith(Mono.just(buffer));
+    }
+
+    private String getClientIp(ServerHttpRequest request) {
+        String ip = request.getHeaders().getFirst("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeaders().getFirst("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddress() != null ? request.getRemoteAddress().getAddress().getHostAddress() : "unknown";
+        }
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
     }
 
     @Override

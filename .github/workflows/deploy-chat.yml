@@ -142,6 +142,10 @@ jobs:
               targetPort: 8087
           EOF
 
+      - name: Restart deployment
+        run: |
+          kubectl rollout restart deployment/nova-chat -n novachat
+
       - name: Verify deployment
         run: |
           kubectl rollout status deployment/nova-chat -n novachat --timeout=120s
