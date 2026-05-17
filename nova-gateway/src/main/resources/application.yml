@@ -3,8 +3,17 @@ server:
   address: 0.0.0.0
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+  codec:
+    max-in-memory-size: 10MB
   cloud:
     gateway:
+      httpclient:
+        streaming-timeout: 30000
       discovery:
         locator:
           enabled: true

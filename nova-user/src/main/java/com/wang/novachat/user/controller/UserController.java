@@ -25,13 +25,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -140,7 +134,7 @@ public class UserController {
     @Operation(summary = "上传头像", description = "上传用户头像图片，返回图片URL")
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<FileUploadResult> uploadAvatar(
-            @Parameter(description = "头像图片文件", required = true, schema = @Schema(type = "string", format = "binary")) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "头像图片文件", required = true) @RequestPart("file") MultipartFile file,
             HttpServletRequest request) {
         Long userId = requireUserId(request);
         FileUploadResult result = fileService.uploadAvatar(userId, file);
@@ -150,7 +144,7 @@ public class UserController {
     @Operation(summary = "上传图片", description = "上传聊天图片，返回图片URL")
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<FileUploadResult> uploadImage(
-            @Parameter(description = "图片文件", required = true, schema = @Schema(type = "string", format = "binary")) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "图片文件", required = true) @RequestPart("file") MultipartFile file,
             HttpServletRequest request) {
         Long userId = requireUserId(request);
         FileUploadResult result = fileService.uploadImage(userId, file);
