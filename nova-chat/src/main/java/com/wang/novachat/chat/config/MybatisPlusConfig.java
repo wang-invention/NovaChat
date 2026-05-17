@@ -22,7 +22,6 @@ public class MybatisPlusConfig {
         return interceptor;
     }
 
-
     @Bean
     public MetaObjectHandler metaObjectHandler() {
         return new MetaObjectHandler() {

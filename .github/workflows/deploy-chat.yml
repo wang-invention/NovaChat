@@ -102,7 +102,7 @@ jobs:
               spec:
                 containers:
                 - name: nova-chat
-                  image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}::${{ github.sha }}
+                  image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
                   ports:
                   - containerPort: 8087
                   env:
