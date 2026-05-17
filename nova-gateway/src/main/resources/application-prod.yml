@@ -57,8 +57,6 @@ spring:
           filters:
             - RewritePath=/v3/api-docs/chat,/v3/api-docs
 
-
-
 nova:
   # JWT 密钥须与 nova-user 一致，否则签名校验通不过
   jwt:

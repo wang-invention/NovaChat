@@ -173,9 +173,11 @@ public class LoginSessionService {
         return session != null ? session.getDeviceId() : null;
     }
 
+    private static final String SEPARATOR = "|";
+
     private String buildSessionData(LoginSession session) {
-        return String.format("%d:%s:%s:%s:%s:%s:%s:%s",
-                session.getUserId(),
+        return String.join(SEPARATOR,
+                String.valueOf(session.getUserId()),
                 session.getUsername() != null ? session.getUsername() : "",
                 session.getDeviceId() != null ? session.getDeviceId() : "",
                 session.getDeviceType() != null ? session.getDeviceType() : "",
@@ -189,7 +191,7 @@ public class LoginSessionService {
         if (data == null || data.isEmpty()) {
             return null;
         }
-        String[] parts = data.split(":", 8);
+        String[] parts = data.split(java.util.regex.Pattern.quote(SEPARATOR), 8);
         if (parts.length < 8) {
             log.warn("[Session] 会话数据格式错误：{}", data);
             return null;

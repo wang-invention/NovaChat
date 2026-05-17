@@ -71,6 +71,3 @@ springdoc:
   swagger-ui:
     enabled: true
   packages-to-scan: com.wang.novachat.user.controller
-#  servers:
-#    - url: http://129.211.0.210:30087/api/user
-#      description: 网关公网地址

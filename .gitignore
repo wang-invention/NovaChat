@@ -13,7 +13,9 @@ target/
 *.ipr
 .cursor
 nova-front/.trae/
-
+node_modules/
+.trae/
+*/dist/
 
 ### Eclipse ###
 .apt_generated
