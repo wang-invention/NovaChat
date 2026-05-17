@@ -83,6 +83,8 @@ public class SwaggerServerRewriteFilter implements GlobalFilter, Ordered {
                 String host = exchange.getRequest().getURI().getHost();
                 int port = exchange.getRequest().getURI().getPort();
 
+
+
                 String gatewayUrl;
                 if (port > 0 && port != 80 && port != 443) {
                     gatewayUrl = scheme + "://" + host + ":" + port;

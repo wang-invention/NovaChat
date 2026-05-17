@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -150,8 +151,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public List<FriendVO> getFriendList(Long userId) {
         LambdaQueryWrapper<Friend> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Friend::getUserId, userId)
-                .orderByAsc(Friend::getCreateTime);
+        wrapper.eq(Friend::getUserId, userId);
         List<Friend> friends = friendMapper.selectList(wrapper);
 
         List<FriendVO> result = new ArrayList<>();
@@ -161,9 +161,55 @@ public class FriendServiceImpl implements FriendService {
             vo.setRemark(friend.getRemark());
             vo.setAddTime(friend.getCreateTime());
             fillFriendUserInfo(vo, friend.getFriendId());
+            vo.setInitial(getInitial(vo.getNickname(), vo.getUsername()));
             result.add(vo);
         }
+
+        result.sort(Comparator.comparing(FriendVO::getInitial)
+                .thenComparing(f -> f.getNickname() != null ? f.getNickname() : f.getUsername()));
         return result;
+    }
+
+    private String getInitial(String nickname, String username) {
+        String name = (nickname != null && !nickname.isBlank()) ? nickname : username;
+        if (name == null || name.isBlank()) return "#";
+        char firstChar = name.charAt(0);
+        if (firstChar >= 'a' && firstChar <= 'z') return String.valueOf(firstChar).toUpperCase();
+        if (firstChar >= 'A' && firstChar <= 'Z') return String.valueOf(firstChar);
+        if (firstChar >= '\u4e00' && firstChar <= '\u9fa5') {
+            return getPinyinInitial(firstChar);
+        }
+        return "#";
+    }
+
+    private String getPinyinInitial(char chineseChar) {
+        int[] pinyinValue = new int[]{
+            45217, 45253, 45761, 46318, 46826, 47010, 47297, 47614, 48119, 49062,
+            49324, 49896, 50371, 50614, 50622, 50906, 51387, 51446, 52218, 52698,
+            52980, 53689, 54481, 55289
+        };
+        String[] initials = new String[]{
+            "A", "B", "C", "D", "E", "F", "G", "H", "J", "K",
+            "L", "M", "N", "O", "P", "Q", "R", "S", "T", "W",
+            "X", "Y", "Z"
+        };
+        int gbkCode;
+        try {
+            byte[] bytes = String.valueOf(chineseChar).getBytes("GBK");
+            if (bytes.length == 2) {
+                gbkCode = (bytes[0] & 0xFF) * 256 + (bytes[1] & 0xFF);
+            } else {
+                return "#";
+            }
+        } catch (Exception e) {
+            return "#";
+        }
+        for (int i = 0; i < pinyinValue.length; i++) {
+            if (gbkCode < pinyinValue[i]) {
+                return i == 0 ? "A" : initials[i - 1];
+            }
+        }
+        return "Z";
     }
 
     @Override

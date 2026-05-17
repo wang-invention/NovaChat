@@ -31,4 +31,7 @@ public class FriendVO implements Serializable {
 
     @Schema(description = "添加时间")
     private LocalDateTime addTime;
+
+    @Schema(description = "首字母(用于通讯录分组)")
+    private String initial;
 }
