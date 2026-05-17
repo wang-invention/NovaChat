@@ -6,7 +6,7 @@ permissions:
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'nova-gateway/**'
       - 'nova-common/**'
@@ -143,6 +143,10 @@ jobs:
               targetPort: 8080
               nodePort: 30087
           EOF
+
+      - name: Restart deployment
+        run: |
+          kubectl rollout restart deployment/nova-gateway -n novachat
 
       - name: Verify deployment
         run: |
