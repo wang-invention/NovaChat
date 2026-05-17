@@ -25,11 +25,9 @@ spring:
             - StripPrefix=2
 
         - id: nova-chat-websocket
-          uri: lb:ws://nova-chat
+          uri: lb://nova-chat
           predicates:
-            - Path=/ws/chat/**
-          filters:
-            - WebSocketFilter
+            - Path=/ws/chat
 
         - id: nova-ai
           uri: http://129.211.0.210:8000

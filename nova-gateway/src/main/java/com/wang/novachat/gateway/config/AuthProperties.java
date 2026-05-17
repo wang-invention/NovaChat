@@ -19,6 +19,7 @@ public class AuthProperties {
     /** 是否开启 JWT 鉴权；线下联调可设为 false 临时关闭 */
     private boolean enabled = true;
 
+
     /** 免鉴权白名单（Ant 路径） */
     private List<String> whiteList = new ArrayList<>();
 }
