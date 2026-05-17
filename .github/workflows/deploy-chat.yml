@@ -58,7 +58,6 @@ jobs:
           images: ${{ env.REGISTRY_PUSH }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
-            type=sha,format=short
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -102,7 +101,8 @@ jobs:
               spec:
                 containers:
                 - name: nova-chat
-                  image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+                  image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
+                  imagePullPolicy: Always
                   ports:
                   - containerPort: 8087
                   env:
