@@ -16,6 +16,8 @@ public interface FriendService {
 
     List<FriendRequestVO> getPendingRequests(Long userId);
 
+    List<FriendRequestVO> getRequestHistory(Long userId);
+
     List<FriendVO> getFriendList(Long userId);
 
     boolean isFriend(Long userId, Long targetUserId);

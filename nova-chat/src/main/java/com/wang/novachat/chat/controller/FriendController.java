@@ -71,6 +71,13 @@ public class FriendController {
         return Result.success(friendService.getPendingRequests(userId));
     }
 
+    @Operation(summary = "获取申请记录", description = "获取当前用户的所有好友申请历史记录(发出的+收到的)")
+    @GetMapping("/requests/history")
+    public Result<List<FriendRequestVO>> getRequestHistory(HttpServletRequest request) {
+        Long userId = requireUserId(request);
+        return Result.success(friendService.getRequestHistory(userId));
+    }
+
     @Operation(summary = "获取好友列表", description = "获取当前用户的所有好友列表")
     @GetMapping("/list")
     public Result<List<FriendVO>> getFriendList(HttpServletRequest request) {

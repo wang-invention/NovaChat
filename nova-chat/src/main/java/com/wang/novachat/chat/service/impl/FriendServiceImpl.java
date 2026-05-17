@@ -149,6 +149,28 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    public List<FriendRequestVO> getRequestHistory(Long userId) {
+        LambdaQueryWrapper<FriendRequest> wrapper = new LambdaQueryWrapper<>();
+        wrapper.and(w -> w.eq(FriendRequest::getFromUserId, userId)
+                        .or().eq(FriendRequest::getToUserId, userId))
+                .orderByDesc(FriendRequest::getCreateTime);
+        List<FriendRequest> requests = friendRequestMapper.selectList(wrapper);
+
+        List<FriendRequestVO> result = new ArrayList<>();
+        for (FriendRequest req : requests) {
+            FriendRequestVO vo = new FriendRequestVO();
+            BeanUtils.copyProperties(req, vo);
+            if (req.getFromUserId().equals(userId)) {
+                fillUserInfo(vo, req.getToUserId());
+            } else {
+                fillUserInfo(vo, req.getFromUserId());
+            }
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
     public List<FriendVO> getFriendList(Long userId) {
         LambdaQueryWrapper<Friend> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Friend::getUserId, userId);
