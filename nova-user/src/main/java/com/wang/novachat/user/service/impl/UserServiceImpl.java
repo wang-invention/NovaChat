@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public LoginVO register(UserRegisterDTO dto, String registerIp) {
+    public LoginVO register(UserRegisterDTO dto, String registerIp, String deviceId) {
         if (existsByUsername(dto.getUsername())) {
             throw new BusinessException(ResultCode.USER_ALREADY_EXIST);
         }
@@ -87,7 +87,10 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.USER_ALREADY_EXIST);
         }
 
-        String deviceId = IdUtil.fastSimpleUUID();
+        if (StrUtil.isBlank(deviceId)) {
+            deviceId = IdUtil.fastSimpleUUID();
+        }
+
         String tokenId = IdUtil.fastSimpleUUID();
         String token = jwtService.issueToken(user.getId(), user.getUsername(), tokenId, deviceId);
         long ttlSeconds = jwtService.getExpireSeconds();
@@ -131,7 +134,10 @@ public class UserServiceImpl implements UserService {
         if (!PasswordUtils.matches(dto.getPassword(), user.getPassword())) {
             throw new BusinessException(ResultCode.PASSWORD_ERROR);
         }
-
+        //todo: 前端生成 deviceId 存在本地,不然同一个浏览器生成的deviceId会不同，
+        // 前端每次请求必须携带当前真实设备 ID（前端本地固定生成那个）
+        //网关解析 Redis 会话，取出该 Token 绑定的原始 deviceId
+        //两个 deviceId 不一致 → 直接拦截，判定盗号盗用 Token
         if (StrUtil.isBlank(deviceId)) {
             deviceId = IdUtil.fastSimpleUUID();
         }

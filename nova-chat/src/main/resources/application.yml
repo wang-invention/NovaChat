@@ -21,7 +21,7 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     banner: false
     db-config:
@@ -43,8 +43,11 @@ management:
 
 logging:
   level:
-    com.wang.novachat: debug
+    com.wang.novachat: info
     com.wang.novachat.chat.mapper: debug
+    org.springframework.jdbc.core: warn
+    com.zaxxer.hikari: warn
+    org.apache.ibatis: warn
 
 springdoc:
   api-docs:

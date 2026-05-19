@@ -17,7 +17,7 @@
         </button>
         <div v-if="results.length > 0" class="search-results">
           <div v-for="user in results" :key="user.id || user.userId" class="search-result-item">
-            <img v-if="user.avatar" :src="user.avatar" class="search-result-avatar" alt="">
+            <img v-if="user.avatar && !imgErrors[user.id || user.userId]" :src="user.avatar" class="search-result-avatar" @error="imgErrors[user.id || user.userId] = true" alt="">
             <div v-else class="search-result-avatar-placeholder">{{ (user.nickname || user.username || '?')[0] }}</div>
             <div class="search-result-info">
               <div class="search-result-name">{{ user.nickname || user.username }}</div>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { searchUser } from '../api/user'
 
 const emit = defineEmits(['close', 'chat'])
@@ -43,6 +43,7 @@ const keyword = ref('')
 const results = ref([])
 const searched = ref(false)
 const searching = ref(false)
+const imgErrors = reactive({})
 
 async function doSearch() {
   if (!keyword.value.trim()) return

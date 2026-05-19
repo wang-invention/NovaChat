@@ -5,14 +5,17 @@
         <button class="btn-back" @click="$emit('back')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <img v-if="conversation?.avatar" :src="conversation.avatar" class="chat-avatar" alt="">
-        <div v-else class="chat-avatar" :style="{ background: avatarColor(conversation?.name) }"></div>
+        <img v-if="conversation?.avatar && !imgErrors['header']" :src="conversation.avatar" class="chat-avatar" @error="imgErrors['header'] = true" alt="">
+        <div v-else class="chat-avatar-placeholder" :style="{ background: avatarColor(conversation?.name) }">{{ (conversation?.name || '?')[0] }}</div>
         <div class="chat-header-text">
           <span class="chat-name">{{ conversation?.name || '未知' }}</span>
-          <span class="chat-status">{{ isStreaming ? 'AI 正在输入...' : '在线' }}</span>
+          <span class="chat-status">{{ isStreaming ? 'AI 正在输入...' : (conversation?.isGroup ? '群聊' : '在线') }}</span>
         </div>
       </div>
       <div class="chat-header-actions">
+        <button v-if="conversation?.isGroup" class="icon-btn" title="群聊信息" @click="$emit('group-info')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+        </button>
         <button class="icon-btn" title="语音通话" @click="$emit('call')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </button>
@@ -23,25 +26,31 @@
     </div>
 
     <div class="msg-list" ref="msgList" @scroll="onScroll">
-      <div v-for="msg in messages" :key="msg.id" class="msg-item" :class="msgClass(msg)" @contextmenu.prevent="onContextMenu($event, msg)">
-        <img v-if="msg.senderAvatar && msgClass(msg) !== 'self'" :src="msg.senderAvatar" class="msg-avatar" alt="">
-        <div v-else-if="msgClass(msg) !== 'self'" class="msg-avatar-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <div v-if="loadingMore" class="msg-loading-more">加载中...</div>
+      <template v-for="(msg, index) in messages" :key="msg.id">
+        <div v-if="shouldShowTime(msg, index)" class="msg-time-divider">{{ formatTime(msg.createdAt) }}</div>
+        <div class="msg-item" :class="msgClass(msg)" @contextmenu.prevent="onContextMenu($event, msg)">
+          <img v-if="msgClass(msg) === 'self' && props.user?.avatar && !imgErrors['self_avatar']" :src="props.user.avatar" class="msg-avatar" @error="imgErrors['self_avatar'] = true" alt="">
+          <div v-else-if="msgClass(msg) === 'self'" class="msg-avatar-placeholder">{{ (props.user?.nickname || props.user?.username || '?')[0] }}</div>
+          <img v-else-if="msg.senderAvatar && !imgErrors['m_' + msg.id]" :src="msg.senderAvatar" class="msg-avatar" @error="imgErrors['m_' + msg.id] = true" alt="">
+          <div v-else class="msg-avatar-placeholder" :style="{ background: avatarColor(msg.senderName) }">
+            {{ (msg.senderName || '?')[0] }}
+          </div>
+          <div class="msg-bubble-wrap">
+            <div v-if="msg.recalled" class="msg-bubble recalled">消息已撤回</div>
+            <template v-else>
+              <div v-if="msg.type === 'image'" class="msg-bubble" style="padding:4px;background:transparent;box-shadow:none;">
+                <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" alt="">
+              </div>
+              <div v-else class="msg-bubble">
+                {{ msg.content }}
+                <div v-if="msg.typing" class="msg-typing"><span></span><span></span><span></span></div>
+              </div>
+            </template>
+            <span v-if="msg.status === 'failed'" class="msg-status failed" @click="$emit('resend', msg)">发送失败，点击重试</span>
+          </div>
         </div>
-        <div class="msg-bubble-wrap">
-          <div v-if="msg.recalled" class="msg-bubble recalled">消息已撤回</div>
-          <template v-else>
-            <div v-if="msg.type === 'image'" class="msg-bubble" style="padding:4px;background:transparent;box-shadow:none;">
-              <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" alt="">
-            </div>
-            <div v-else class="msg-bubble">
-              {{ msg.content }}
-              <div v-if="msg.typing" class="msg-typing"><span></span><span></span><span></span></div>
-            </div>
-          </template>
-          <span v-if="msg.status === 'failed'" class="msg-status failed" @click="$emit('resend', msg)">发送失败，点击重试</span>
-        </div>
-      </div>
+      </template>
     </div>
 
     <div v-if="contextMenu.show" class="msg-context-menu" :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }">
@@ -103,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch } from 'vue'
+import { ref, computed, nextTick, watch, reactive } from 'vue'
 import { polishMessage } from '../api/ai'
 
 const props = defineProps({
@@ -111,16 +120,20 @@ const props = defineProps({
   messages: { type: Array, default: () => [] },
   isStreaming: { type: Boolean, default: false },
   streamingMsgId: { type: String, default: '' },
-  chatBg: { type: String, default: '' }
+  chatBg: { type: String, default: '' },
+  user: { type: Object, default: () => ({}) },
+  loadingMore: { type: Boolean, default: false },
+  hasMore: { type: Boolean, default: true }
 })
 
-const emit = defineEmits(['send', 'recall', 'back', 'settings', 'call', 'resend'])
+const emit = defineEmits(['send', 'recall', 'back', 'settings', 'call', 'resend', 'group-info', 'load-more'])
 
 const inputText = ref('')
 const msgInput = ref(null)
 const msgList = ref(null)
 const showEmoji = ref(false)
 const showPolish = ref(false)
+const imgErrors = reactive({})
 const polishLoading = ref(false)
 const polishResults = ref([])
 const contextMenu = ref({ show: false, x: 0, y: 0, msg: null })
@@ -136,8 +149,10 @@ const emojis = [
 ]
 
 const currentUserId = computed(() => {
-  const user = JSON.parse(localStorage.getItem('nova_user') || '{}')
-  return user.id || user.userId
+  return props.user?.id || props.user?.userId || (() => {
+    const u = JSON.parse(localStorage.getItem('nova_user') || '{}')
+    return u.id || u.userId
+  })()
 })
 
 function msgClass(msg) {
@@ -201,6 +216,9 @@ function recallMsg() {
 
 function onScroll() {
   contextMenu.value.show = false
+  if (props.hasMore && !props.loadingMore && msgList.value && msgList.value.scrollTop <= 10) {
+    emit('load-more')
+  }
 }
 
 function onImageSelect(e) {
@@ -237,6 +255,27 @@ function applyPolish(item) {
 
 function previewImage(url) {
   window.open(url, '_blank')
+}
+
+function formatTime(ts) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  const now = new Date()
+  const pad = n => String(n).padStart(2, '0')
+  const isToday = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+  const isYesterday = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate() - 1
+  const timeStr = pad(d.getHours()) + ':' + pad(d.getMinutes())
+  if (isToday) return timeStr
+  if (isYesterday) return '昨天 ' + timeStr
+  return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + timeStr
+}
+
+function shouldShowTime(msg, index) {
+  if (index === 0) return true
+  const prev = props.messages[index - 1]
+  if (!prev || !prev.createdAt || !msg.createdAt) return true
+  const diff = new Date(msg.createdAt).getTime() - new Date(prev.createdAt).getTime()
+  return diff > 5 * 60 * 1000
 }
 
 watch(showPolish, (val) => {

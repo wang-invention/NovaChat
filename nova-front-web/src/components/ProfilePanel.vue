@@ -8,8 +8,8 @@
     </div>
     <div class="profile-body">
       <div class="profile-avatar-section">
-        <img v-if="user.avatar" :src="user.avatar" class="profile-avatar-img" alt="">
-        <div v-else class="profile-avatar-img" :style="{ background: avatarBg }"></div>
+        <img v-if="user.avatar && !imgErrors['profile']" :src="user.avatar" class="profile-avatar-img" @error="imgErrors['profile'] = true" alt="">
+        <div v-else class="profile-avatar-img" :style="{ background: avatarBg }">{{ (user.nickname || user.username || '?')[0] }}</div>
         <div>
           <button class="btn btn-sm btn-primary" style="margin-top:4px;" @click="$refs.avatarInput.click()">更换头像</button>
           <input ref="avatarInput" type="file" accept="image/*" style="display:none" @change="onAvatarChange">
@@ -68,6 +68,7 @@ const emit = defineEmits(['close', 'updated'])
 const router = useRouter()
 
 const user = ref(getUser() || {})
+const imgErrors = reactive({})
 const form = reactive({
   nickname: user.value.nickname || '',
   gender: user.value.gender || '',

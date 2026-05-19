@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.wang.novachat.chat.dto.SendMessageDTO;
 import com.wang.novachat.chat.entity.Conversation;
+import com.wang.novachat.chat.entity.ConversationMemberRead;
 import com.wang.novachat.chat.entity.Group;
 import com.wang.novachat.chat.entity.GroupMember;
 import com.wang.novachat.chat.entity.Message;
 import com.wang.novachat.chat.mapper.ConversationMapper;
+import com.wang.novachat.chat.mapper.ConversationMemberReadMapper;
 import com.wang.novachat.chat.mapper.GroupMapper;
 import com.wang.novachat.chat.mapper.GroupMemberMapper;
 import com.wang.novachat.chat.mapper.MessageMapper;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 public class ChatServiceImpl implements ChatService {
 
     private final ConversationMapper conversationMapper;
+    private final ConversationMemberReadMapper conversationMemberReadMapper;
     private final MessageMapper messageMapper;
     private final GroupMapper groupMapper;
     private final GroupMemberMapper groupMemberMapper;
@@ -64,20 +67,32 @@ public class ChatServiceImpl implements ChatService {
         message.setQuoteId(dto.getQuoteId());
         message.setRecalled(0);
         messageMapper.insert(message);
-
         Conversation conv = conversationMapper.selectById(conversationId);
         if (conv != null) {
             String preview = buildPreview(dto);
-            conv.setLastMessage(preview);
-            conv.setLastMessageTime(LocalDateTime.now());
             if (isGroup) {
-                conv.setUnreadCountUser2(conv.getUnreadCountUser2() + 1);
-            } else if (conv.getUser1Id().equals(senderId)) {
-                conv.setUnreadCountUser2(conv.getUnreadCountUser2() + 1);
+                log.info("群聊发消息，只更新lastMessage，conversationId={}", conversationId);
+                LambdaUpdateWrapper<ConversationMemberRead> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(ConversationMemberRead::getConversationId, conversationId)
+                        .ne(ConversationMemberRead::getUserId, senderId)
+                        .setSql("unread_count = unread_count + 1");
+                conversationMemberReadMapper.update(null, updateWrapper);
+
+                LambdaUpdateWrapper<Conversation> convUpdate = new LambdaUpdateWrapper<>();
+                convUpdate.eq(Conversation::getId, conversationId)
+                        .set(Conversation::getLastMessage, preview)
+                        .set(Conversation::getLastMessageTime, LocalDateTime.now());
+                conversationMapper.update(null, convUpdate);
             } else {
-                conv.setUnreadCountUser1(conv.getUnreadCountUser1() + 1);
+                conv.setLastMessage(preview);
+                conv.setLastMessageTime(LocalDateTime.now());
+                if (conv.getUser1Id().equals(senderId)) {
+                    conv.setUnreadCountUser2(conv.getUnreadCountUser2() + 1);
+                } else {
+                    conv.setUnreadCountUser1(conv.getUnreadCountUser1() + 1);
+                }
+                conversationMapper.updateById(conv);
             }
-            conversationMapper.updateById(conv);
         }
 
         return toMessageVO(message);
@@ -123,7 +138,13 @@ public class ChatServiceImpl implements ChatService {
                 ConversationVO vo = new ConversationVO();
                 vo.setId(groupConv.getId());
                 vo.setTargetUserId(0L);
-                vo.setUnreadCount(groupConv.getUnreadCountUser2());
+
+                LambdaQueryWrapper<ConversationMemberRead> readWrapper = new LambdaQueryWrapper<>();
+                readWrapper.eq(ConversationMemberRead::getConversationId, groupConv.getId())
+                        .eq(ConversationMemberRead::getUserId, userId);
+                ConversationMemberRead read = conversationMemberReadMapper.selectOne(readWrapper);
+                vo.setUnreadCount(read != null ? read.getUnreadCount() : 0);
+
                 vo.setLastMessage(groupConv.getLastMessage());
                 vo.setLastMessageTime(groupConv.getLastMessageTime());
 
@@ -200,12 +221,30 @@ public class ChatServiceImpl implements ChatService {
         Conversation conv = conversationMapper.selectById(conversationId);
         if (conv == null) return;
 
-        if (conv.getUser1Id().equals(userId)) {
-            conv.setUnreadCountUser1(0);
-        } else if (conv.getUser2Id().equals(userId)) {
-            conv.setUnreadCountUser2(0);
+        boolean isGroup = conv.getConversationKey() != null && conv.getConversationKey().startsWith("group_");
+
+        if (isGroup) {
+            LambdaQueryWrapper<Message> msgWrapper = new LambdaQueryWrapper<>();
+            msgWrapper.eq(Message::getConversationId, conversationId)
+                    .orderByDesc(Message::getId)
+                    .last("LIMIT 1");
+            Message latestMsg = messageMapper.selectOne(msgWrapper);
+            Long maxMsgId = latestMsg != null ? latestMsg.getId() : 0L;
+
+            LambdaUpdateWrapper<ConversationMemberRead> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(ConversationMemberRead::getConversationId, conversationId)
+                    .eq(ConversationMemberRead::getUserId, userId)
+                    .set(ConversationMemberRead::getUnreadCount, 0)
+                    .set(ConversationMemberRead::getLastReadMessageId, maxMsgId);
+            conversationMemberReadMapper.update(null, updateWrapper);
+        } else {
+            if (conv.getUser1Id().equals(userId)) {
+                conv.setUnreadCountUser1(0);
+            } else if (conv.getUser2Id().equals(userId)) {
+                conv.setUnreadCountUser2(0);
+            }
+            conversationMapper.updateById(conv);
         }
-        conversationMapper.updateById(conv);
     }
 
     @Override

@@ -5,9 +5,11 @@ import com.wang.novachat.chat.dto.AddGroupMemberDTO;
 import com.wang.novachat.chat.dto.CreateGroupDTO;
 import com.wang.novachat.chat.dto.UpdateGroupDTO;
 import com.wang.novachat.chat.entity.Conversation;
+import com.wang.novachat.chat.entity.ConversationMemberRead;
 import com.wang.novachat.chat.entity.Group;
 import com.wang.novachat.chat.entity.GroupMember;
 import com.wang.novachat.chat.mapper.ConversationMapper;
+import com.wang.novachat.chat.mapper.ConversationMemberReadMapper;
 import com.wang.novachat.chat.mapper.GroupMapper;
 import com.wang.novachat.chat.mapper.GroupMemberMapper;
 import com.wang.novachat.chat.service.GroupService;
@@ -34,6 +36,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMapper groupMapper;
     private final GroupMemberMapper groupMemberMapper;
     private final ConversationMapper conversationMapper;
+    private final ConversationMemberReadMapper conversationMemberReadMapper;
     private final RestTemplate restTemplate;
 
     @Override
@@ -70,6 +73,12 @@ public class GroupServiceImpl implements GroupService {
         conv.setUnreadCountUser1(0);
         conv.setUnreadCountUser2(0);
         conversationMapper.insert(conv);
+
+        initMemberReadStatus(conv.getId(), ownerId);
+        for (Long memberId : dto.getMemberIds()) {
+            if (memberId.equals(ownerId)) continue;
+            initMemberReadStatus(conv.getId(), memberId);
+        }
 
         return toGroupVO(group);
     }
@@ -171,6 +180,13 @@ public class GroupServiceImpl implements GroupService {
             member.setUserId(userId);
             member.setRole(GroupMember.ROLE_MEMBER);
             groupMemberMapper.insert(member);
+
+            String convKey = "group_" + groupId;
+            Conversation conv = conversationMapper.selectOne(
+                    new LambdaQueryWrapper<Conversation>().eq(Conversation::getConversationKey, convKey));
+            if (conv != null) {
+                initMemberReadStatus(conv.getId(), userId);
+            }
         }
     }
 
@@ -190,6 +206,8 @@ public class GroupServiceImpl implements GroupService {
         wrapper.eq(GroupMember::getGroupId, groupId)
                 .eq(GroupMember::getUserId, targetUserId);
         groupMemberMapper.delete(wrapper);
+
+        deleteMemberReadStatus(groupId, targetUserId);
     }
 
     @Override
@@ -207,6 +225,8 @@ public class GroupServiceImpl implements GroupService {
         wrapper.eq(GroupMember::getGroupId, groupId)
                 .eq(GroupMember::getUserId, userId);
         groupMemberMapper.delete(wrapper);
+
+        deleteMemberReadStatus(groupId, userId);
     }
 
     @Override
@@ -264,6 +284,12 @@ public class GroupServiceImpl implements GroupService {
 
         LambdaQueryWrapper<Conversation> convWrapper = new LambdaQueryWrapper<>();
         convWrapper.eq(Conversation::getConversationKey, "group_" + groupId);
+        Conversation conv = conversationMapper.selectOne(convWrapper);
+        if (conv != null) {
+            LambdaQueryWrapper<ConversationMemberRead> readWrapper = new LambdaQueryWrapper<>();
+            readWrapper.eq(ConversationMemberRead::getConversationId, conv.getId());
+            conversationMemberReadMapper.delete(readWrapper);
+        }
         conversationMapper.delete(convWrapper);
 
         groupMapper.deleteById(groupId);
@@ -338,5 +364,31 @@ public class GroupServiceImpl implements GroupService {
             log.warn("获取用户信息失败, userId={}: {}", userId, e.getMessage());
             vo.setNickname("用户" + userId);
         }
+    }
+
+    private void initMemberReadStatus(Long conversationId, Long userId) {
+        LambdaQueryWrapper<ConversationMemberRead> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ConversationMemberRead::getConversationId, conversationId)
+                .eq(ConversationMemberRead::getUserId, userId);
+        if (conversationMemberReadMapper.selectCount(wrapper) > 0) return;
+
+        ConversationMemberRead read = new ConversationMemberRead();
+        read.setConversationId(conversationId);
+        read.setUserId(userId);
+        read.setLastReadMessageId(0L);
+        read.setUnreadCount(0);
+        conversationMemberReadMapper.insert(read);
+    }
+
+    private void deleteMemberReadStatus(Long groupId, Long userId) {
+        String convKey = "group_" + groupId;
+        Conversation conv = conversationMapper.selectOne(
+                new LambdaQueryWrapper<Conversation>().eq(Conversation::getConversationKey, convKey));
+        if (conv == null) return;
+
+        LambdaQueryWrapper<ConversationMemberRead> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ConversationMemberRead::getConversationId, conv.getId())
+                .eq(ConversationMemberRead::getUserId, userId);
+        conversationMemberReadMapper.delete(wrapper);
     }
 }

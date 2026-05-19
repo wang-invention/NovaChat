@@ -1,4 +1,4 @@
-import { getToken, clearAuth } from '../utils/auth'
+import { getToken, clearAuth, getDeviceId } from '../utils/auth'
 
 const BASE = import.meta.env.VITE_API_BASE + '/api/user'
 
@@ -6,6 +6,7 @@ async function request(path, options = {}) {
   const headers = { 'Content-Type': 'application/json' }
   const token = getToken()
   if (token) headers['Authorization'] = 'Bearer ' + token
+  headers['X-Device-Id'] = getDeviceId()
 
   const res = await fetch(BASE + path, { ...options, headers: { ...headers, ...options.headers } })
   const data = await res.json()
@@ -31,5 +32,6 @@ export function upload(path, formData) {
   const headers = {}
   const token = getToken()
   if (token) headers['Authorization'] = 'Bearer ' + token
+  headers['X-Device-Id'] = getDeviceId()
   return fetch(BASE + path, { method: 'POST', headers, body: formData }).then(r => r.json())
 }

@@ -19,8 +19,9 @@ public interface UserService {
      *
      * @param dto 注册参数
      * @param registerIp 注册 IP（Controller 从请求中取）
+     * @param deviceId 设备 ID（客户端持久化的，空则自动生成）
      */
-    LoginVO register(UserRegisterDTO dto, String registerIp);
+    LoginVO register(UserRegisterDTO dto, String registerIp, String deviceId);
 
     /**
      * 账号密码登录，返回用户信息 + Token。

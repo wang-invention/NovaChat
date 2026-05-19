@@ -50,7 +50,8 @@ public class UserController {
             @Valid @RequestBody @Parameter(description = "注册信息", required = true) UserRegisterDTO dto,
             HttpServletRequest request) {
         String ip = IpUtils.getClientIp(request);
-        LoginVO vo = userService.register(dto, ip);
+        String deviceId = request.getHeader(CommonConstant.HEADER_X_DEVICE_ID);
+        LoginVO vo = userService.register(dto, ip, deviceId);
         return Result.success("注册成功", vo);
     }
 

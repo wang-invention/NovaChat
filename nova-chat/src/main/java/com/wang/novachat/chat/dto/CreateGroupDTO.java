@@ -1,9 +1,7 @@
 package com.wang.novachat.chat.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
@@ -27,6 +25,7 @@ public class CreateGroupDTO {
 
     @Schema(description = "群最大成员数", example = "200")
     @NotNull(message = "群最大成员数不能为空")
-    @Size(min = 1, max = 200, message = "群最大成员数1-200")
+    @Min(1)
+    @Max(500)
     private Integer MaxMembers;
 }

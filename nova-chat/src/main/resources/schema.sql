@@ -98,3 +98,18 @@ CREATE TABLE IF NOT EXISTS t_group_member (
     KEY idx_group_id (group_id),
     KEY idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='群成员表';
+
+CREATE TABLE IF NOT EXISTS t_conversation_member_read (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id BIGINT NOT NULL COMMENT '会话ID（对应t_conversation的id）',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    last_read_message_id BIGINT NOT NULL DEFAULT 0 COMMENT '该用户最后已读的消息ID',
+    unread_count INT NOT NULL DEFAULT 0 COMMENT '该用户在这个会话的未读数',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_conv_user (conversation_id, user_id),
+    KEY idx_user_id (user_id),
+    KEY idx_conversation_id (conversation_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会话成员已读状态表';

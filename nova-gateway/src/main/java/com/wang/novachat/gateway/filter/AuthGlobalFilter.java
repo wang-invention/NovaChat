@@ -93,11 +93,12 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         String redisKey = RedisKeys.token(tokenId);
         return reactiveStringRedisTemplate.hasKey(redisKey)
                 .flatMap(exists -> {
+                    // Redis 中不存在，则 Token 已失效
                     if (!Boolean.TRUE.equals(exists)) {
                         log.info("[Auth] Token 已在 Redis 中失效：tokenId={}", tokenId);
                         return writeUnauthorized(exchange, ResultCode.TOKEN_REVOKED, "Token 已失效");
                     }
-
+                    // Redis 中存在，则 Token  still valid
                     ServerHttpRequest mutated = sanitized.mutate()
                             .header(CommonConstant.HEADER_USER_ID, String.valueOf(userId))
                             .header(CommonConstant.HEADER_USERNAME, username == null ? "" : username)

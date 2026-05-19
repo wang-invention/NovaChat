@@ -3,7 +3,7 @@
     <div v-if="requests.length > 0">
       <div class="contact-section-title">新的朋友</div>
       <div v-for="req in requests" :key="req.id" class="request-item">
-        <img v-if="req.avatar || req.senderAvatar" :src="req.avatar || req.senderAvatar" class="request-avatar" alt="">
+        <img v-if="req.avatar && !imgErrors['req_' + req.id]" :src="req.avatar" class="request-avatar" @error="imgErrors['req_' + req.id] = true" alt="">
         <div v-else class="request-avatar-placeholder">{{ (req.senderName || '?')[0] }}</div>
         <div class="request-info">
           <div class="request-name">{{ req.senderName || req.senderNickname || '未知用户' }}</div>
@@ -23,8 +23,8 @@
     <div v-if="friends.length === 0" style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">
       暂无好友
     </div>
-    <div v-for="friend in friends" :key="friend.id || friend.userId" class="contact-item" @click="$emit('chat', friend)">
-      <img v-if="friend.avatar" :src="friend.avatar" class="contact-avatar" alt="">
+    <div v-for="friend in friends" :key="friend.friendId || friend.id || friend.userId" class="contact-item" @click="$emit('chat', friend)">
+        <img v-if="(friend.avatar || friend.targetAvatar) && !imgErrors['f_' + (friend.friendId || friend.id || friend.userId)]" :src="friend.avatar || friend.targetAvatar" class="contact-avatar" @error="imgErrors['f_' + (friend.friendId || friend.id || friend.userId)] = true" alt="">
       <div v-else class="contact-avatar-placeholder">{{ (friend.nickname || friend.username || '?')[0] }}</div>
       <div class="contact-info">
         <div class="contact-name">{{ friend.nickname || friend.username }}</div>
@@ -36,10 +36,14 @@
 </template>
 
 <script setup>
+import { reactive } from 'vue'
+
 defineProps({
   friends: { type: Array, default: () => [] },
   requests: { type: Array, default: () => [] }
 })
 
 defineEmits(['chat', 'accept', 'reject'])
+
+const imgErrors = reactive({})
 </script>

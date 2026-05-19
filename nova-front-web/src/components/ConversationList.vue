@@ -10,14 +10,15 @@
       :class="{ active: conv.id === activeId }"
       @click="$emit('select', conv)"
     >
-      <img v-if="conv.avatar" :src="conv.avatar" class="conv-avatar" alt="">
+      <img v-if="conv.avatar && !imgErrors[conv.id]" :src="conv.avatar" class="conv-avatar" @error="imgErrors[conv.id] = true" alt="">
       <div v-else class="conv-avatar-placeholder" :style="{ background: avatarColor(conv.name) }">
         {{ (conv.name || '?')[0] }}
       </div>
       <div class="conv-info">
         <div class="conv-name">
           {{ conv.name }}
-          <span v-if="conv.id === 'ai_assistant' || conv.type === 'ai'" class="ai-badge">AI</span>
+          <span v-if="conv.isGroup" class="group-badge">群</span>
+          <span v-else-if="conv.id === 'ai_assistant' || conv.type === 'ai'" class="ai-badge">AI</span>
         </div>
         <div class="conv-last-msg">{{ conv.lastMessage || conv.lastMsg || '' }}</div>
       </div>
@@ -30,12 +31,16 @@
 </template>
 
 <script setup>
+import { reactive } from 'vue'
+
 defineProps({
   conversations: { type: Array, default: () => [] },
   activeId: { type: String, default: '' }
 })
 
 defineEmits(['select'])
+
+const imgErrors = reactive({})
 
 function avatarColor(name) {
   const colors = ['#07C160', '#10AEFF', '#FF6B6B', '#FFD93D', '#6C5CE7', '#00B894']
