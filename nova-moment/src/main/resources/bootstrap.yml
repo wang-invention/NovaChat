@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: nova-chat
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: 129.211.0.210:8848
+      discovery:
+        namespace: public
+        group: NOVA_GROUP
+      config:
+        namespace: public
+        group: NOVA_GROUP
+        file-extension: yaml
+        shared-configs:
+          - data-id: nova-redis.yaml
+            group: NOVA_GROUP
+            refresh: true
