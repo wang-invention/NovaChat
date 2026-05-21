@@ -103,7 +103,7 @@ jobs:
                   image: ${{ env.REGISTRY_PULL }}/${{ env.IMAGE_NAME }}:latest
                   imagePullPolicy: Always
                   ports:
-                  - containerPort: 20000
+                  - containerPort: 8088
                   env:
                   - name: SPRING_PROFILES_ACTIVE
                     value: "prod"
@@ -118,12 +118,12 @@ jobs:
                       cpu: "500m"
                   livenessProbe:
                     tcpSocket:
-                      port: 20000
+                      port: 8088
                     initialDelaySeconds: 30
                     periodSeconds: 10
                   readinessProbe:
                     tcpSocket:
-                      port: 20000
+                      port: 8088
                     initialDelaySeconds: 10
                     periodSeconds: 5
           ---
@@ -137,8 +137,8 @@ jobs:
             selector:
               app: nova-moment
             ports:
-            - port: 20000
-              targetPort: 20000
+            - port: 8088
+              targetPort: 8088
           EOF
 
       - name: Restart deployment
