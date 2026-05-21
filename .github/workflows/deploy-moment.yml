@@ -119,12 +119,12 @@ jobs:
                   livenessProbe:
                     tcpSocket:
                       port: 8088
-                    initialDelaySeconds: 30
+                    initialDelaySeconds: 60
                     periodSeconds: 10
                   readinessProbe:
                     tcpSocket:
                       port: 8088
-                    initialDelaySeconds: 10
+                    initialDelaySeconds: 40
                     periodSeconds: 5
           ---
           apiVersion: v1
