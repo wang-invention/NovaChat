@@ -1,4 +1,4 @@
-import { getToken } from '../utils/auth'
+import { getToken, clearAuth } from '../utils/auth'
 
 const BASE = import.meta.env.VITE_API_BASE + '/api/chat'
 
@@ -8,6 +8,11 @@ async function request(path, options = {}) {
   if (token) headers['Authorization'] = 'Bearer ' + token
 
   const res = await fetch(BASE + path, { ...options, headers: { ...headers, ...options.headers } })
+  if (res.status === 401) {
+    clearAuth()
+    window.location.hash = '#/login'
+    throw new Error('登录已过期')
+  }
   const data = await res.json()
   if (!res.ok) throw new Error(data.message || data.msg || '请求失败')
   return data
@@ -65,8 +70,8 @@ export function getFriendRequestHistory() {
   return get('/friend/requests/history')
 }
 
-export function sendFriendRequest(receiverId, message) {
-  return post('/friend/request', { receiverId, message })
+export function sendFriendRequest(targetUserId, message) {
+  return post('/friend/request', { targetUserId, message })
 }
 
 export function acceptFriendRequest(requestId) {

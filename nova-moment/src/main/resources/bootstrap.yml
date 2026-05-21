@@ -1,6 +1,6 @@
 spring:
   application:
-    name: nova-chat
+    name: nova-moment
   profiles:
     active: dev
   cloud:

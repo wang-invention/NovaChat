@@ -32,15 +32,6 @@ mybatis-plus:
       update-strategy: not_null
   mapper-locations: classpath*:/mapper/**/*.xml
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "health,info"
-  endpoint:
-    health:
-      show-details: always
-
 logging:
   level:
     com.wang.novachat: debug
@@ -56,3 +47,13 @@ springdoc:
 #  overridden:
 #    server: http://129.211.0.210:30087
 #    context-path: /api/chat
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

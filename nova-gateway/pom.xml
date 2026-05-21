@@ -23,6 +23,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- 网关也直接声明 JWT 依赖，保证过滤器解析 Token 时类路径完整 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

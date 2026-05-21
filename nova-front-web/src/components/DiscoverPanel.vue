@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="discover-item">
+    <div class="discover-item" @click="$emit('open-moments')">
       <div class="discover-icon-wrap" style="background:linear-gradient(135deg,#FF6B6B,#FFD93D)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
@@ -30,3 +30,7 @@
     </div>
   </div>
 </template>
+
+<script setup>
+defineEmits(['open-moments'])
+</script>

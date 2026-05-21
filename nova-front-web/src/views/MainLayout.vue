@@ -54,13 +54,13 @@
       <div class="sidebar-content">
         <ConversationList v-if="activeTab === 'chats'" :conversations="filteredConversations" :active-id="currentChatId" @select="selectChat" />
         <ContactList v-else-if="activeTab === 'contacts'" :friends="friends" :requests="friendRequests" @chat="startChatWith" @accept="acceptRequest" @reject="rejectRequest" />
-        <DiscoverPanel v-else-if="activeTab === 'discover'" />
+        <DiscoverPanel v-else-if="activeTab === 'discover'" @open-moments="showMoments = true" />
       </div>
     </aside>
 
     <!-- 右侧主内容区 -->
     <main class="main-content">
-      <div v-if="!currentChatId && !showProfile" class="chat-empty">
+      <div v-if="!currentChatId && !showProfile && !showMoments" class="chat-empty">
         <div class="empty-logo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
@@ -68,7 +68,7 @@
         <p>选择一个会话开始聊天</p>
       </div>
 
-      <div v-if="currentChatId && !showProfile" class="chat-wrapper" :class="{ 'with-panel': showGroupPanel && currentConversation?.isGroup }">
+      <div v-if="currentChatId && !showProfile && !showMoments" class="chat-wrapper" :class="{ 'with-panel': showGroupPanel && currentConversation?.isGroup }">
         <ChatView
           :conversation="currentConversation"
           :messages="messages"
@@ -97,6 +97,14 @@
       </div>
 
       <ProfilePanel v-if="showProfile" @close="showProfile = false" @updated="onProfileUpdated" />
+
+      <Moments
+        v-if="showMoments"
+        :current-user-id="user.id"
+        :user-info="user"
+        @back="showMoments = false"
+        @go-chat="startChatWith"
+      />
 
       <ChatSettingsPanel
         v-if="showChatSettings && currentChatId"
@@ -136,6 +144,7 @@ import SearchModal from '../components/SearchModal.vue'
 import AddFriendModal from '../components/AddFriendModal.vue'
 import CreateGroupModal from '../components/CreateGroupModal.vue'
 import GroupChatPanel from '../components/GroupChatPanel.vue'
+import Moments from './Moments.vue'
 import CallOverlay from '../components/CallOverlay.vue'
 
 const router = useRouter()
@@ -154,6 +163,7 @@ const showSearch = ref(false)
 const showAddFriend = ref(false)
 const showCreateGroup = ref(false)
 const showGroupPanel = ref(false)
+const showMoments = ref(false)
 const chatBg = ref('')
 const isStreaming = ref(false)
 const streamingMsgId = ref('')

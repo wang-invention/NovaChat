@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY target/nova-chat.jar app.jar
+COPY target/nova-moment.jar app.jar
 
 EXPOSE 8087
 

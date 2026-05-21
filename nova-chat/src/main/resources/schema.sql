@@ -113,3 +113,52 @@ CREATE TABLE IF NOT EXISTS t_conversation_member_read (
     KEY idx_user_id (user_id),
     KEY idx_conversation_id (conversation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会话成员已读状态表';
+
+CREATE TABLE IF NOT EXISTS t_moment (
+    id BIGINT PRIMARY KEY COMMENT '雪花ID',
+    user_id BIGINT NOT NULL COMMENT '发布者ID',
+    content TEXT COMMENT '文字内容',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_user_id (user_id),
+    KEY idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='朋友圈动态';
+
+CREATE TABLE IF NOT EXISTS t_moment_image (
+    id BIGINT PRIMARY KEY COMMENT '雪花ID',
+    moment_id BIGINT NOT NULL COMMENT '动态ID',
+    image_url VARCHAR(500) NOT NULL COMMENT '图片URL',
+    sort_order INT DEFAULT 0 COMMENT '排序',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_moment_id (moment_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='朋友圈图片';
+
+CREATE TABLE IF NOT EXISTS t_moment_like (
+    id BIGINT PRIMARY KEY COMMENT '雪花ID',
+    moment_id BIGINT NOT NULL COMMENT '动态ID',
+    user_id BIGINT NOT NULL COMMENT '点赞用户ID',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_moment_user (moment_id, user_id),
+    KEY idx_moment_id (moment_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='朋友圈点赞';
+
+CREATE TABLE IF NOT EXISTS t_moment_comment (
+    id BIGINT PRIMARY KEY COMMENT '雪花ID',
+    moment_id BIGINT NOT NULL COMMENT '动态ID',
+    user_id BIGINT NOT NULL COMMENT '评论用户ID',
+    reply_to_user_id BIGINT DEFAULT NULL COMMENT '回复目标用户ID',
+    content VARCHAR(500) NOT NULL COMMENT '评论内容',
+    version INT DEFAULT 0,
+    is_deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_moment_id (moment_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='朋友圈评论';

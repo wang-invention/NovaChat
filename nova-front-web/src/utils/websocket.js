@@ -1,4 +1,4 @@
-import { getToken } from '../utils/auth'
+import { getToken, clearAuth } from '../utils/auth'
 
 const WS_URL = import.meta.env.VITE_WS_URL
 
@@ -8,11 +8,21 @@ let heartbeatTimer = null
 let reconnectTimer = null
 const handlers = []
 
+function handleAuthExpired() {
+  stopHeartbeat()
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
+  ws = null
+  clearAuth()
+  window.location.hash = '#/login'
+}
+
 export function connect(userId) {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
 
   const token = getToken()
-  const url = WS_URL + '?userId=' + userId + (token ? '&token=' + token : '')
+  if (!token) { handleAuthExpired(); return }
+
+  const url = WS_URL + '?userId=' + userId + '&token=' + token
 
   try {
     ws = new WebSocket(url)
@@ -30,9 +40,13 @@ export function connect(userId) {
     ws.onclose = () => {
       connected = false
       stopHeartbeat()
+      if (!getToken()) { handleAuthExpired(); return }
       scheduleReconnect(userId)
     }
-    ws.onerror = () => { connected = false }
+    ws.onerror = () => {
+      connected = false
+      if (!getToken()) { handleAuthExpired(); return }
+    }
   } catch {
     scheduleReconnect(userId)
   }

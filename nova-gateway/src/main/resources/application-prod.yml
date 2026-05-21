@@ -101,3 +101,14 @@ logging:
     org.springframework.cloud.gateway: info
     reactor.netty.http.client: info
     com.wang.novachat.gateway.filter: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

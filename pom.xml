@@ -16,6 +16,7 @@
         <module>nova-user</module>
         <module>nova-common</module>
         <module>nova-chat</module>
+        <module>nova-moment</module>
     </modules>
 
     <properties>
