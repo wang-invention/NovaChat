@@ -73,6 +73,13 @@ spring:
           filters:
             - RewritePath=/v3/api-docs/chat,/v3/api-docs
 
+        - id: nova-moment-api-docs
+          uri: lb://nova-moment
+          predicates:
+            - Path=/v3/api-docs/moment
+          filters:
+            - RewritePath=/v3/api-docs/moment,/v3/api-docs
+
 
 
 nova:
@@ -110,6 +117,8 @@ springdoc:
         name: 用户服务
       - url: /v3/api-docs/chat
         name: 聊天服务
+      - url: /v3/api-docs/moment
+        name: 朋友圈服务
 
 logging:
   level:

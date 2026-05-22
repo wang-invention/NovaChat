@@ -119,6 +119,8 @@ public class SwaggerServerRewriteFilter implements GlobalFilter, Ordered {
             return "/api/user";
         } else if (path.contains("/v3/api-docs/chat")) {
             return "/api/chat";
+        } else if (path.contains("/v3/api-docs/moment")) {
+            return "/api/moment";
         }
         return null;
     }
